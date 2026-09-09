@@ -1,9 +1,7 @@
-import './App.css'
+import { LoginPage } from '@/pages/login'
 
 function App() {
-  return (
-    <h1 className="text-center">ETV Booking</h1>
-  )
+  return <LoginPage />
 }
 
 export default App
