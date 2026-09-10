@@ -36,7 +36,7 @@
     font-size: 16px;
   }
 
-  --background: oklch(1 0 0);
+  --background: #f0f2f5;
 
   --foreground: oklch(0.145 0 0);
 
@@ -48,9 +48,9 @@
 
   --popover-foreground: oklch(0.145 0 0);
 
-  --primary: oklch(0.205 0 0);
+  --primary: #2121b5;
 
-  --primary-foreground: oklch(0.985 0 0);
+  --primary-foreground: #ffffff;
 
   --secondary: oklch(0.97 0 0);
 
