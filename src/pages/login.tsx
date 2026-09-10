@@ -3,13 +3,22 @@ import padlock from '@/assets/padlock.png'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
-function handleSubmit(event: { preventDefault(): void }) {
-  event.preventDefault()
+type LoginPageProps = {
+  onLogin: (username: string) => void
 }
 
-export function LoginPage() {
+export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
+  function handleSubmit(event: { preventDefault(): void; currentTarget: HTMLFormElement }) {
+    event.preventDefault()
+    const usernameField = event.currentTarget.elements.namedItem('username')
+    if (!(usernameField instanceof HTMLInputElement)) return
+
+    const username = usernameField.value.trim()
+    if (username) onLogin(username)
+  }
+
   return (
-    <main className="min-h-svh bg-[#f0f2f5] [--primary:#2121b5] [--primary-foreground:#ffffff]">
+    <main className="min-h-svh bg-background">
       <div className="mx-auto grid min-h-svh w-full max-w-6xl grid-cols-1 lg:grid-cols-2">
         <section className="flex items-center justify-center px-6 py-12 sm:px-10">
           <form
