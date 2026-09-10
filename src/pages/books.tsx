@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { PowerIcon } from 'lucide-react'
 import logo from '@/assets/logo.svg'
 import { BookCard } from '@/components/book-card'
@@ -6,49 +5,21 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { Book } from '@/types/book'
 
-const initialBooks: Book[] = [
-  {
-    id: '1',
-    title: 'Docker Deep Dive',
-    author: 'Nigel Poulton',
-    price: 47.9,
-    releaseDate: '2017-07-12',
-  },
-  {
-    id: '2',
-    title: 'Docker Deep Dive',
-    author: 'Nigel Poulton',
-    price: 47.9,
-    releaseDate: '2017-07-12',
-  },
-  {
-    id: '3',
-    title: 'Docker Deep Dive',
-    author: 'Nigel Poulton',
-    price: 47.9,
-    releaseDate: '2017-07-12',
-  },
-  {
-    id: '4',
-    title: 'Docker Deep Dive',
-    author: 'Nigel Poulton',
-    price: 47.9,
-    releaseDate: '2017-07-12',
-  },
-]
-
 type BooksPageProps = {
   username: string
+  books: Book[]
+  onAddNewBook: () => void
+  onDelete: (id: string) => void
   onLogout: () => void
 }
 
-export function BooksPage({ username, onLogout }: Readonly<BooksPageProps>) {
-  const [books, setBooks] = useState(initialBooks)
-
-  function handleDelete(id: string) {
-    setBooks((current) => current.filter((book) => book.id !== id))
-  }
-
+export function BooksPage({
+  username,
+  books,
+  onAddNewBook,
+  onDelete,
+  onLogout,
+}: Readonly<BooksPageProps>) {
   return (
     <main className="min-h-svh bg-background">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-8 sm:px-10 sm:py-10">
@@ -61,7 +32,7 @@ export function BooksPage({ username, onLogout }: Readonly<BooksPageProps>) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button type="button" className="h-10 min-w-40 px-6">
+            <Button type="button" className="h-10 min-w-40 px-6" onClick={onAddNewBook}>
               Add New Book
             </Button>
             <Button
@@ -91,7 +62,7 @@ export function BooksPage({ username, onLogout }: Readonly<BooksPageProps>) {
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {books.map((book) => (
-                <BookCard key={book.id} book={book} onDelete={handleDelete} />
+                <BookCard key={book.id} book={book} onDelete={onDelete} />
               ))}
             </div>
           )}
