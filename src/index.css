@@ -125,6 +125,10 @@ body {
   margin: 0;
 }
 
+input[type="date"] {
+  color-scheme: light;
+}
+
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: 'Inter Variable', sans-serif;
