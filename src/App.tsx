@@ -1,19 +1,27 @@
 import { useState } from 'react'
 import { initialBooks } from '@/data/books'
+import { setAuthToken } from '@/lib/axios'
 import { AddBookPage } from '@/pages/add-book'
 import { BooksPage } from '@/pages/books'
 import { LoginPage } from '@/pages/login'
+import type { AuthSession } from '@/types/auth'
 import type { Book } from '@/types/book'
 
 type Screen = 'books' | 'add-book'
 
 function App() {
-  const [username, setUsername] = useState<string | null>(null)
+  const [session, setSession] = useState<AuthSession | null>(null)
   const [screen, setScreen] = useState<Screen>('books')
   const [books, setBooks] = useState(initialBooks)
 
+  function handleLogin(nextSession: AuthSession) {
+    setAuthToken(nextSession.accessToken)
+    setSession(nextSession)
+  }
+
   function handleLogout() {
-    setUsername(null)
+    setAuthToken(null)
+    setSession(null)
     setScreen('books')
   }
 
@@ -37,8 +45,8 @@ function App() {
     setScreen('books')
   }
 
-  if (!username) {
-    return <LoginPage onLogin={setUsername} />
+  if (!session) {
+    return <LoginPage onLogin={handleLogin} />
   }
 
   if (screen === 'add-book') {
@@ -47,7 +55,7 @@ function App() {
 
   return (
     <BooksPage
-      username={username}
+      username={session.username}
       books={books}
       onAddNewBook={handleAddNewBook}
       onDelete={handleDelete}

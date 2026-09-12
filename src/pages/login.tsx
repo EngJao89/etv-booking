@@ -1,20 +1,44 @@
+import { useState } from 'react'
 import logo from '@/assets/logo.svg'
 import padlock from '@/assets/padlock.png'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { signIn } from '@/services/auth'
+import type { AuthSession } from '@/types/auth'
 
 type LoginPageProps = {
-  onLogin: (username: string) => void
+  onLogin: (session: AuthSession) => void
+}
+
+function readInput(form: HTMLFormElement, name: string) {
+  const field = form.elements.namedItem(name)
+  if (!(field instanceof HTMLInputElement)) return ''
+  return field.value.trim()
 }
 
 export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
-  function handleSubmit(event: { preventDefault(): void; currentTarget: HTMLFormElement }) {
-    event.preventDefault()
-    const usernameField = event.currentTarget.elements.namedItem('username')
-    if (!(usernameField instanceof HTMLInputElement)) return
+  const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-    const username = usernameField.value.trim()
-    if (username) onLogin(username)
+  async function handleSubmit(event: { preventDefault(): void; currentTarget: HTMLFormElement }) {
+    event.preventDefault()
+    const form = event.currentTarget
+    const username = readInput(form, 'username')
+    const password = readInput(form, 'password')
+
+    if (!username || !password) return
+
+    setError(null)
+    setIsSubmitting(true)
+
+    try {
+      const session = await signIn({ username, password })
+      onLogin(session)
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to sign in. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -43,6 +67,7 @@ export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
                   placeholder="Username"
                   autoComplete="username"
                   required
+                  disabled={isSubmitting}
                   className="h-11 bg-white px-3"
                 />
 
@@ -56,12 +81,24 @@ export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
                   placeholder="Password"
                   autoComplete="current-password"
                   required
+                  disabled={isSubmitting}
                   className="h-11 bg-white px-3"
                 />
               </div>
 
-              <Button type="submit" size="lg" className="h-11 w-full text-base">
-                Login
+              {error ? (
+                <p role="alert" className="text-sm text-destructive">
+                  {error}
+                </p>
+              ) : null}
+
+              <Button
+                type="submit"
+                size="lg"
+                className="h-11 w-full text-base"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Signing in...' : 'Login'}
               </Button>
             </div>
           </form>
