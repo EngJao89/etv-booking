@@ -24,8 +24,8 @@ const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
 function BookField({ label, value }: Readonly<{ label: string; value: string }>) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="font-semibold text-neutral-950">{label}</span>
-      <span className="text-neutral-500">{value}</span>
+      <span className="font-semibold text-foreground">{label}</span>
+      <span className="text-muted-foreground">{value}</span>
     </div>
   )
 }
@@ -37,7 +37,7 @@ type BookCardProps = {
 
 export function BookCard({ book, onDelete }: Readonly<BookCardProps>) {
   return (
-    <Card className="bg-white shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader>
         <BookField label="Title:" value={book.title} />
         <CardAction className="flex flex-col gap-0.5">

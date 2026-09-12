@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import logo from '@/assets/logo.svg'
 import padlock from '@/assets/padlock.png'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { signInSchema, type SignInFormValues } from '@/schemas/sign-in'
@@ -39,7 +40,10 @@ export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
   }
 
   return (
-    <main className="min-h-svh bg-background">
+    <main className="relative min-h-svh bg-background">
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+      </div>
       <div className="mx-auto grid min-h-svh w-full max-w-6xl grid-cols-1 lg:grid-cols-2">
         <section className="flex items-center justify-center px-6 py-12 sm:px-10">
           <form
@@ -50,7 +54,7 @@ export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
             <img src={logo} alt="ETV" className="size-14 rounded-md" />
 
             <div className="flex flex-col gap-5">
-              <h1 className="text-left text-[1.75rem] leading-tight font-bold tracking-tight text-neutral-950">
+              <h1 className="text-left text-[1.75rem] leading-tight font-bold tracking-tight text-foreground">
                 Access your Account
               </h1>
 
@@ -66,7 +70,7 @@ export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
                     autoComplete="username"
                     disabled={isSubmitting}
                     aria-invalid={Boolean(errors.username)}
-                    className="h-11 bg-white px-3"
+                    className="h-11 bg-card px-3"
                     {...register('username')}
                   />
                   {errors.username ? (
@@ -87,7 +91,7 @@ export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
                     autoComplete="current-password"
                     disabled={isSubmitting}
                     aria-invalid={Boolean(errors.password)}
-                    className="h-11 bg-white px-3"
+                    className="h-11 bg-card px-3"
                     {...register('password')}
                   />
                   {errors.password ? (
@@ -121,7 +125,7 @@ export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
           className="hidden items-center justify-center p-10 lg:flex"
         >
           <div className="relative size-[min(22rem,70vw)] drop-shadow-[0_24px_40px_rgba(0,0,0,0.18)]">
-            <div className="absolute inset-[16%] rounded-full bg-white" />
+            <div className="absolute inset-[16%] rounded-full bg-card" />
             <img
               src={padlock}
               alt=""

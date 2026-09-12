@@ -1,6 +1,7 @@
 import { PowerIcon } from 'lucide-react'
 import logo from '@/assets/logo.svg'
 import { BookCard } from '@/components/book-card'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { Book } from '@/types/book'
@@ -26,7 +27,7 @@ export function BooksPage({
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <img src={logo} alt="ETV" className="size-12 rounded-md" />
-            <p className="text-sm text-neutral-950 sm:text-base">
+            <p className="text-sm text-foreground sm:text-base">
               Welcome, <span className="italic text-primary">{username}!</span>
             </p>
           </div>
@@ -35,11 +36,12 @@ export function BooksPage({
             <Button type="button" className="h-10 min-w-40 px-6" onClick={onAddNewBook}>
               Add New Book
             </Button>
+            <ThemeToggle />
             <Button
               type="button"
               variant="outline"
               size="icon"
-              className="size-10 bg-white"
+              className="size-10 bg-card"
               aria-label="Log out"
               onClick={onLogout}
             >
@@ -49,14 +51,14 @@ export function BooksPage({
         </header>
 
         <section className="flex flex-col gap-4">
-          <h1 className="text-2xl font-bold tracking-tight text-neutral-950">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Registered Books
           </h1>
 
           {books.length === 0 ? (
-            <Card className="bg-white shadow-sm">
+            <Card className="shadow-sm">
               <CardContent>
-                <p className="text-neutral-500">No books registered yet.</p>
+                <p className="text-muted-foreground">No books registered yet.</p>
               </CardContent>
             </Card>
           ) : (
