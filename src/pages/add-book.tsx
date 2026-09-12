@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import logo from '@/assets/logo.svg'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { addBookSchema, parsePrice, type AddBookFormValues } from '@/schemas/add-book'
@@ -37,16 +38,19 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
   }
 
   return (
-    <main className="min-h-svh bg-background">
+    <main className="relative min-h-svh bg-background">
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+      </div>
       <div className="mx-auto grid min-h-svh w-full max-w-6xl grid-cols-1 items-center gap-10 px-6 py-12 lg:grid-cols-2 lg:gap-16 lg:px-16">
         <section className="flex flex-col items-start gap-8">
           <img src={logo} alt="ETV" className="size-24 rounded-md" />
 
           <div className="flex max-w-sm flex-col gap-3">
-            <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight text-neutral-950">
+            <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight text-foreground">
               Add New Book
             </h1>
-            <p className="text-neutral-500">
+            <p className="text-muted-foreground">
               Enter the book information and click on
               <br />
               'Add'!
@@ -79,7 +83,7 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
                 type="text"
                 placeholder="Title"
                 aria-invalid={Boolean(errors.title)}
-                className="h-11 bg-white px-3"
+                className="h-11 bg-card px-3"
                 {...register('title')}
               />
               {errors.title ? (
@@ -98,7 +102,7 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
                 type="text"
                 placeholder="Author"
                 aria-invalid={Boolean(errors.author)}
-                className="h-11 bg-white px-3"
+                className="h-11 bg-card px-3"
                 {...register('author')}
               />
               {errors.author ? (
@@ -117,7 +121,7 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
                 type="date"
                 lang="pt-BR"
                 aria-invalid={Boolean(errors.releaseDate)}
-                className="h-11 bg-white px-3"
+                className="h-11 bg-card px-3"
                 {...register('releaseDate')}
               />
               {errors.releaseDate ? (
@@ -137,7 +141,7 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
                 inputMode="decimal"
                 placeholder="Price"
                 aria-invalid={Boolean(errors.price)}
-                className="h-11 bg-white px-3"
+                className="h-11 bg-card px-3"
                 {...register('price')}
               />
               {errors.price ? (
