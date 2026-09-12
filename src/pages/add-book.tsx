@@ -1,7 +1,10 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftIcon } from 'lucide-react'
+import { useForm } from 'react-hook-form'
 import logo from '@/assets/logo.svg'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { addBookSchema, parsePrice, type AddBookFormValues } from '@/schemas/add-book'
 import type { Book } from '@/types/book'
 
 type AddBookPageProps = {
@@ -9,30 +12,28 @@ type AddBookPageProps = {
   onAdd: (book: Omit<Book, 'id'>) => void
 }
 
-function readInput(form: HTMLFormElement, name: string) {
-  const field = form.elements.namedItem(name)
-  if (!(field instanceof HTMLInputElement)) return ''
-  return field.value.trim()
-}
-
-function parsePrice(value: string) {
-  const normalized = value.replace(/\s/g, '').replace('R$', '').replace(',', '.')
-  return Number(normalized)
-}
-
 export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
-  function handleSubmit(event: { preventDefault(): void; currentTarget: HTMLFormElement }) {
-    event.preventDefault()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<AddBookFormValues>({
+    resolver: zodResolver(addBookSchema),
+    defaultValues: {
+      title: '',
+      author: '',
+      releaseDate: '',
+      price: '',
+    },
+  })
 
-    const form = event.currentTarget
-    const title = readInput(form, 'title')
-    const author = readInput(form, 'author')
-    const releaseDate = readInput(form, 'releaseDate')
-    const price = parsePrice(readInput(form, 'price'))
-
-    if (!title || !author || !releaseDate || !Number.isFinite(price)) return
-
-    onAdd({ title, author, price, releaseDate })
+  function onSubmit(values: AddBookFormValues) {
+    onAdd({
+      title: values.title,
+      author: values.author,
+      releaseDate: values.releaseDate,
+      price: parsePrice(values.price),
+    })
   }
 
   return (
@@ -65,59 +66,93 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
 
         <section className="flex justify-center lg:justify-end">
           <form
-            onSubmit={handleSubmit}
+            noValidate
+            onSubmit={handleSubmit(onSubmit)}
             className="flex w-full max-w-md flex-col gap-3"
           >
-            <label htmlFor="title" className="sr-only">
-              Title
-            </label>
-            <Input
-              id="title"
-              name="title"
-              type="text"
-              placeholder="Title"
-              required
-              className="h-11 bg-white px-3"
-            />
+            <div className="flex flex-col gap-1">
+              <label htmlFor="title" className="sr-only">
+                Title
+              </label>
+              <Input
+                id="title"
+                type="text"
+                placeholder="Title"
+                aria-invalid={Boolean(errors.title)}
+                className="h-11 bg-white px-3"
+                {...register('title')}
+              />
+              {errors.title ? (
+                <p role="alert" className="text-sm text-destructive">
+                  {errors.title.message}
+                </p>
+              ) : null}
+            </div>
 
-            <label htmlFor="author" className="sr-only">
-              Author
-            </label>
-            <Input
-              id="author"
-              name="author"
-              type="text"
-              placeholder="Author"
-              required
-              className="h-11 bg-white px-3"
-            />
+            <div className="flex flex-col gap-1">
+              <label htmlFor="author" className="sr-only">
+                Author
+              </label>
+              <Input
+                id="author"
+                type="text"
+                placeholder="Author"
+                aria-invalid={Boolean(errors.author)}
+                className="h-11 bg-white px-3"
+                {...register('author')}
+              />
+              {errors.author ? (
+                <p role="alert" className="text-sm text-destructive">
+                  {errors.author.message}
+                </p>
+              ) : null}
+            </div>
 
-            <label htmlFor="releaseDate" className="sr-only">
-              Release date
-            </label>
-            <Input
-              id="releaseDate"
-              name="releaseDate"
-              type="date"
-              lang="pt-BR"
-              required
-              className="h-11 bg-white px-3"
-            />
+            <div className="flex flex-col gap-1">
+              <label htmlFor="releaseDate" className="sr-only">
+                Release date
+              </label>
+              <Input
+                id="releaseDate"
+                type="date"
+                lang="pt-BR"
+                aria-invalid={Boolean(errors.releaseDate)}
+                className="h-11 bg-white px-3"
+                {...register('releaseDate')}
+              />
+              {errors.releaseDate ? (
+                <p role="alert" className="text-sm text-destructive">
+                  {errors.releaseDate.message}
+                </p>
+              ) : null}
+            </div>
 
-            <label htmlFor="price" className="sr-only">
-              Price
-            </label>
-            <Input
-              id="price"
-              name="price"
-              type="text"
-              inputMode="decimal"
-              placeholder="Price"
-              required
-              className="h-11 bg-white px-3"
-            />
+            <div className="flex flex-col gap-1">
+              <label htmlFor="price" className="sr-only">
+                Price
+              </label>
+              <Input
+                id="price"
+                type="text"
+                inputMode="decimal"
+                placeholder="Price"
+                aria-invalid={Boolean(errors.price)}
+                className="h-11 bg-white px-3"
+                {...register('price')}
+              />
+              {errors.price ? (
+                <p role="alert" className="text-sm text-destructive">
+                  {errors.price.message}
+                </p>
+              ) : null}
+            </div>
 
-            <Button type="submit" size="lg" className="mt-1 h-11 w-full text-base">
+            <Button
+              type="submit"
+              size="lg"
+              className="mt-1 h-11 w-full text-base"
+              disabled={isSubmitting}
+            >
               Add
             </Button>
           </form>

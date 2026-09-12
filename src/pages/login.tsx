@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
 import logo from '@/assets/logo.svg'
 import padlock from '@/assets/padlock.png'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { signInSchema, type SignInFormValues } from '@/schemas/sign-in'
 import { signIn } from '@/services/auth'
 import type { AuthSession } from '@/types/auth'
 
@@ -10,34 +12,29 @@ type LoginPageProps = {
   onLogin: (session: AuthSession) => void
 }
 
-function readInput(form: HTMLFormElement, name: string) {
-  const field = form.elements.namedItem(name)
-  if (!(field instanceof HTMLInputElement)) return ''
-  return field.value.trim()
-}
-
 export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
-  const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<SignInFormValues>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: {
+      username: '',
+      password: '',
+    },
+  })
 
-  async function handleSubmit(event: { preventDefault(): void; currentTarget: HTMLFormElement }) {
-    event.preventDefault()
-    const form = event.currentTarget
-    const username = readInput(form, 'username')
-    const password = readInput(form, 'password')
-
-    if (!username || !password) return
-
-    setError(null)
-    setIsSubmitting(true)
-
+  async function onSubmit(values: SignInFormValues) {
     try {
-      const session = await signIn({ username, password })
+      const session = await signIn(values)
       onLogin(session)
     } catch (error_) {
-      setError(error_ instanceof Error ? error_.message : 'Unable to sign in. Please try again.')
-    } finally {
-      setIsSubmitting(false)
+      setError('root', {
+        message:
+          error_ instanceof Error ? error_.message : 'Unable to sign in. Please try again.',
+      })
     }
   }
 
@@ -46,7 +43,8 @@ export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
       <div className="mx-auto grid min-h-svh w-full max-w-6xl grid-cols-1 lg:grid-cols-2">
         <section className="flex items-center justify-center px-6 py-12 sm:px-10">
           <form
-            onSubmit={handleSubmit}
+            noValidate
+            onSubmit={handleSubmit(onSubmit)}
             className="flex w-full max-w-88 flex-col gap-8"
           >
             <img src={logo} alt="ETV" className="size-14 rounded-md" />
@@ -57,38 +55,52 @@ export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
               </h1>
 
               <div className="flex flex-col gap-3">
-                <label htmlFor="username" className="sr-only">
-                  Username
-                </label>
-                <Input
-                  id="username"
-                  name="username"
-                  type="text"
-                  placeholder="Username"
-                  autoComplete="username"
-                  required
-                  disabled={isSubmitting}
-                  className="h-11 bg-white px-3"
-                />
+                <div className="flex flex-col gap-1">
+                  <label htmlFor="username" className="sr-only">
+                    Username
+                  </label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="Username"
+                    autoComplete="username"
+                    disabled={isSubmitting}
+                    aria-invalid={Boolean(errors.username)}
+                    className="h-11 bg-white px-3"
+                    {...register('username')}
+                  />
+                  {errors.username ? (
+                    <p role="alert" className="text-sm text-destructive">
+                      {errors.username.message}
+                    </p>
+                  ) : null}
+                </div>
 
-                <label htmlFor="password" className="sr-only">
-                  Password
-                </label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="Password"
-                  autoComplete="current-password"
-                  required
-                  disabled={isSubmitting}
-                  className="h-11 bg-white px-3"
-                />
+                <div className="flex flex-col gap-1">
+                  <label htmlFor="password" className="sr-only">
+                    Password
+                  </label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Password"
+                    autoComplete="current-password"
+                    disabled={isSubmitting}
+                    aria-invalid={Boolean(errors.password)}
+                    className="h-11 bg-white px-3"
+                    {...register('password')}
+                  />
+                  {errors.password ? (
+                    <p role="alert" className="text-sm text-destructive">
+                      {errors.password.message}
+                    </p>
+                  ) : null}
+                </div>
               </div>
 
-              {error ? (
+              {errors.root ? (
                 <p role="alert" className="text-sm text-destructive">
-                  {error}
+                  {errors.root.message}
                 </p>
               ) : null}
 
