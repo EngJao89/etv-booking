@@ -1,11 +1,13 @@
+import { useMemo } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import logo from '@/assets/logo.svg'
 import padlock from '@/assets/padlock.png'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { signInSchema, type SignInFormValues } from '@/schemas/sign-in'
+import { createSignInSchema, type SignInFormValues } from '@/schemas/sign-in'
 import { signIn } from '@/services/auth'
 import type { AuthSession } from '@/types/auth'
 
@@ -14,6 +16,8 @@ type LoginPageProps = {
 }
 
 export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
+  const { t } = useTranslation()
+  const signInSchema = useMemo(() => createSignInSchema(t), [t])
   const {
     register,
     handleSubmit,
@@ -34,7 +38,7 @@ export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
     } catch (error_) {
       setError('root', {
         message:
-          error_ instanceof Error ? error_.message : 'Unable to sign in. Please try again.',
+          error_ instanceof Error ? error_.message : t('signIn.unableToSignIn'),
       })
     }
   }
@@ -51,22 +55,22 @@ export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
             onSubmit={handleSubmit(onSubmit)}
             className="flex w-full max-w-88 flex-col gap-8"
           >
-            <img src={logo} alt="ETV" className="size-14 rounded-md" />
+            <img src={logo} alt={t('app.logoAlt')} className="size-14 rounded-md" />
 
             <div className="flex flex-col gap-5">
               <h1 className="text-left text-[1.75rem] leading-tight font-bold tracking-tight text-foreground">
-                Access your Account
+                {t('signIn.title')}
               </h1>
 
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-1">
                   <label htmlFor="username" className="sr-only">
-                    Username
+                    {t('signIn.username')}
                   </label>
                   <Input
                     id="username"
                     type="text"
-                    placeholder="Username"
+                    placeholder={t('signIn.username')}
                     autoComplete="username"
                     disabled={isSubmitting}
                     aria-invalid={Boolean(errors.username)}
@@ -82,12 +86,12 @@ export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
 
                 <div className="flex flex-col gap-1">
                   <label htmlFor="password" className="sr-only">
-                    Password
+                    {t('signIn.password')}
                   </label>
                   <Input
                     id="password"
                     type="password"
-                    placeholder="Password"
+                    placeholder={t('signIn.password')}
                     autoComplete="current-password"
                     disabled={isSubmitting}
                     aria-invalid={Boolean(errors.password)}
@@ -114,7 +118,7 @@ export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
                 className="h-11 w-full text-base"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Signing in...' : 'Login'}
+                {isSubmitting ? t('signIn.signingIn') : t('signIn.login')}
               </Button>
             </div>
           </form>

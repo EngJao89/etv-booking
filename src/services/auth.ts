@@ -1,14 +1,15 @@
 import { isAxiosError } from 'axios'
+import i18n from '@/i18n'
 import { axios } from '@/lib/axios'
 import type { AuthSession, SignInRequest, SignInResponse } from '@/types/auth'
 
 function getSignInErrorMessage(error: unknown) {
   if (!isAxiosError(error)) {
-    return 'Unable to sign in. Please try again.'
+    return i18n.t('signIn.unableToSignIn')
   }
 
   if (!error.response) {
-    return 'Could not reach the server. Please try again.'
+    return i18n.t('signIn.couldNotReachServer')
   }
 
   const { status, data } = error.response
@@ -26,14 +27,14 @@ function getSignInErrorMessage(error: unknown) {
   }
 
   if (status === 401 || status === 403 || apiMessage === 'Bad credentials') {
-    return 'Invalid username or password.'
+    return i18n.t('signIn.invalidCredentials')
   }
 
   if (apiMessage) {
     return apiMessage
   }
 
-  return 'Unable to sign in. Please try again.'
+  return i18n.t('signIn.unableToSignIn')
 }
 
 export async function signIn(payload: SignInRequest): Promise<AuthSession> {

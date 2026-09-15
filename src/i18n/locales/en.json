@@ -1,0 +1,53 @@
+{
+  "app": {
+    "title": "ETV Booking",
+    "logoAlt": "ETV"
+  },
+  "theme": {
+    "change": "Change theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "signIn": {
+    "title": "Access your Account",
+    "username": "Username",
+    "password": "Password",
+    "login": "Login",
+    "signingIn": "Signing in...",
+    "usernameRequired": "Username is required",
+    "passwordRequired": "Password is required",
+    "unableToSignIn": "Unable to sign in. Please try again.",
+    "couldNotReachServer": "Could not reach the server. Please try again.",
+    "invalidCredentials": "Invalid username or password."
+  },
+  "books": {
+    "welcome": "Welcome, <name>{{username}}</name>!",
+    "addNewBook": "Add New Book",
+    "logOut": "Log out",
+    "registeredBooks": "Registered Books",
+    "empty": "No books registered yet.",
+    "title": "Title:",
+    "author": "Author:",
+    "price": "Price:",
+    "releaseDate": "Release Date:",
+    "edit": "Edit {{title}}",
+    "delete": "Delete {{title}}"
+  },
+  "addBook": {
+    "title": "Add New Book",
+    "descriptionLine1": "Enter the book information and click on",
+    "descriptionLine2": "'Add'!",
+    "home": "Home",
+    "fieldTitle": "Title",
+    "fieldAuthor": "Author",
+    "fieldReleaseDate": "Release date",
+    "fieldPrice": "Price",
+    "add": "Add",
+    "titleRequired": "Title is required",
+    "authorRequired": "Author is required",
+    "releaseDateRequired": "Release date is required",
+    "priceRequired": "Price is required",
+    "priceInvalid": "Enter a valid price"
+  }
+}
