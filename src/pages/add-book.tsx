@@ -1,11 +1,13 @@
+import { useMemo } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import logo from '@/assets/logo.svg'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { addBookSchema, parsePrice, type AddBookFormValues } from '@/schemas/add-book'
+import { createAddBookSchema, parsePrice, type AddBookFormValues } from '@/schemas/add-book'
 import type { Book } from '@/types/book'
 
 type AddBookPageProps = {
@@ -14,6 +16,8 @@ type AddBookPageProps = {
 }
 
 export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
+  const { t, i18n } = useTranslation()
+  const addBookSchema = useMemo(() => createAddBookSchema(t), [t])
   const {
     register,
     handleSubmit,
@@ -44,16 +48,16 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
       </div>
       <div className="mx-auto grid min-h-svh w-full max-w-6xl grid-cols-1 items-center gap-10 px-6 py-12 lg:grid-cols-2 lg:gap-16 lg:px-16">
         <section className="flex flex-col items-start gap-8">
-          <img src={logo} alt="ETV" className="size-24 rounded-md" />
+          <img src={logo} alt={t('app.logoAlt')} className="size-24 rounded-md" />
 
           <div className="flex max-w-sm flex-col gap-3">
             <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight text-foreground">
-              Add New Book
+              {t('addBook.title')}
             </h1>
             <p className="text-muted-foreground">
-              Enter the book information and click on
+              {t('addBook.descriptionLine1')}
               <br />
-              'Add'!
+              {t('addBook.descriptionLine2')}
             </p>
           </div>
 
@@ -64,7 +68,7 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
             onClick={onHome}
           >
             <ArrowLeftIcon className="size-4" />
-            Home
+            {t('addBook.home')}
           </Button>
         </section>
 
@@ -76,12 +80,12 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
           >
             <div className="flex flex-col gap-1">
               <label htmlFor="title" className="sr-only">
-                Title
+                {t('addBook.fieldTitle')}
               </label>
               <Input
                 id="title"
                 type="text"
-                placeholder="Title"
+                placeholder={t('addBook.fieldTitle')}
                 aria-invalid={Boolean(errors.title)}
                 className="h-11 bg-card px-3"
                 {...register('title')}
@@ -95,12 +99,12 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
 
             <div className="flex flex-col gap-1">
               <label htmlFor="author" className="sr-only">
-                Author
+                {t('addBook.fieldAuthor')}
               </label>
               <Input
                 id="author"
                 type="text"
-                placeholder="Author"
+                placeholder={t('addBook.fieldAuthor')}
                 aria-invalid={Boolean(errors.author)}
                 className="h-11 bg-card px-3"
                 {...register('author')}
@@ -114,12 +118,12 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
 
             <div className="flex flex-col gap-1">
               <label htmlFor="releaseDate" className="sr-only">
-                Release date
+                {t('addBook.fieldReleaseDate')}
               </label>
               <Input
                 id="releaseDate"
                 type="date"
-                lang="pt-BR"
+                lang={i18n.language}
                 aria-invalid={Boolean(errors.releaseDate)}
                 className="h-11 bg-card px-3"
                 {...register('releaseDate')}
@@ -133,13 +137,13 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
 
             <div className="flex flex-col gap-1">
               <label htmlFor="price" className="sr-only">
-                Price
+                {t('addBook.fieldPrice')}
               </label>
               <Input
                 id="price"
                 type="text"
                 inputMode="decimal"
-                placeholder="Price"
+                placeholder={t('addBook.fieldPrice')}
                 aria-invalid={Boolean(errors.price)}
                 className="h-11 bg-card px-3"
                 {...register('price')}
@@ -157,7 +161,7 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
               className="mt-1 h-11 w-full text-base"
               disabled={isSubmitting}
             >
-              Add
+              {t('addBook.add')}
             </Button>
           </form>
         </section>

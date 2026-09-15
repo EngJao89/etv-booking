@@ -1,4 +1,5 @@
 import { MonitorIcon, MoonIcon, SunIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme, type Theme } from '@/components/theme-provider'
 import { Button } from '@/components/ui/button'
 import {
@@ -8,14 +9,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-const options: { value: Theme; label: string; icon: typeof SunIcon }[] = [
-  { value: 'light', label: 'Light', icon: SunIcon },
-  { value: 'dark', label: 'Dark', icon: MoonIcon },
-  { value: 'system', label: 'System', icon: MonitorIcon },
-]
-
 export function ThemeToggle() {
+  const { t } = useTranslation()
   const { theme, resolvedTheme, setTheme } = useTheme()
+  const options: { value: Theme; label: string; icon: typeof SunIcon }[] = [
+    { value: 'light', label: t('theme.light'), icon: SunIcon },
+    { value: 'dark', label: t('theme.dark'), icon: MoonIcon },
+    { value: 'system', label: t('theme.system'), icon: MonitorIcon },
+  ]
 
   return (
     <DropdownMenu>
@@ -26,7 +27,7 @@ export function ThemeToggle() {
             variant="outline"
             size="icon"
             className="size-10 bg-card"
-            aria-label="Change theme"
+            aria-label={t('theme.change')}
           />
         }
       >
