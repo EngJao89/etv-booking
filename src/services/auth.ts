@@ -41,6 +41,10 @@ export async function signIn(payload: SignInRequest): Promise<AuthSession> {
   try {
     const { data } = await axios.post<SignInResponse>('/auth/signin', payload)
 
+    if (!data.accessToken) {
+      throw new Error(i18n.t('signIn.unableToSignIn'))
+    }
+
     return {
       username: data.username,
       accessToken: data.accessToken,

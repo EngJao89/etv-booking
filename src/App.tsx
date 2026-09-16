@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { initialBooks } from '@/data/books'
 import { setAuthToken } from '@/lib/axios'
 import { AddBookPage } from '@/pages/add-book'
@@ -13,6 +13,10 @@ function App() {
   const [session, setSession] = useState<AuthSession | null>(null)
   const [screen, setScreen] = useState<Screen>('books')
   const [books, setBooks] = useState(initialBooks)
+
+  useEffect(() => {
+    setAuthToken(session?.accessToken ?? null)
+  }, [session])
 
   function handleLogin(nextSession: AuthSession) {
     setAuthToken(nextSession.accessToken)
@@ -37,11 +41,8 @@ function App() {
     setBooks((current) => current.filter((book) => book.id !== id))
   }
 
-  function handleAddBook(book: Omit<Book, 'id'>) {
-    setBooks((current) => [
-      { ...book, id: crypto.randomUUID() },
-      ...current,
-    ])
+  function handleAddBook(book: Book) {
+    setBooks((current) => [book, ...current])
     setScreen('books')
   }
 
