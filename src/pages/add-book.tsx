@@ -8,11 +8,12 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { createAddBookSchema, parsePrice, type AddBookFormValues } from '@/schemas/add-book'
+import { createBook } from '@/services/books'
 import type { Book } from '@/types/book'
 
 type AddBookPageProps = {
   onHome: () => void
-  onAdd: (book: Omit<Book, 'id'>) => void
+  onAdd: (book: Book) => void
 }
 
 export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
@@ -21,6 +22,7 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<AddBookFormValues>({
     resolver: zodResolver(addBookSchema),
@@ -32,13 +34,21 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
     },
   })
 
-  function onSubmit(values: AddBookFormValues) {
-    onAdd({
-      title: values.title,
-      author: values.author,
-      releaseDate: values.releaseDate,
-      price: parsePrice(values.price),
-    })
+  async function onSubmit(values: AddBookFormValues) {
+    try {
+      const book = await createBook({
+        title: values.title.trim(),
+        author: values.author.trim(),
+        launchDate: `${values.releaseDate}T00:00:00.000Z`,
+        price: parsePrice(values.price),
+      })
+      onAdd(book)
+    } catch (error_) {
+      setError('root', {
+        message:
+          error_ instanceof Error ? error_.message : t('addBook.unableToAdd'),
+      })
+    }
   }
 
   return (
@@ -78,6 +88,11 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
             onSubmit={handleSubmit(onSubmit)}
             className="flex w-full max-w-md flex-col gap-3"
           >
+            {errors.root ? (
+              <p role="alert" className="text-sm text-destructive">
+                {errors.root.message}
+              </p>
+            ) : null}
             <div className="flex flex-col gap-1">
               <label htmlFor="title" className="sr-only">
                 {t('addBook.fieldTitle')}
@@ -86,6 +101,7 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
                 id="title"
                 type="text"
                 placeholder={t('addBook.fieldTitle')}
+                disabled={isSubmitting}
                 aria-invalid={Boolean(errors.title)}
                 className="h-11 bg-card px-3"
                 {...register('title')}
@@ -105,6 +121,7 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
                 id="author"
                 type="text"
                 placeholder={t('addBook.fieldAuthor')}
+                disabled={isSubmitting}
                 aria-invalid={Boolean(errors.author)}
                 className="h-11 bg-card px-3"
                 {...register('author')}
@@ -124,6 +141,7 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
                 id="releaseDate"
                 type="date"
                 lang={i18n.language}
+                disabled={isSubmitting}
                 aria-invalid={Boolean(errors.releaseDate)}
                 className="h-11 bg-card px-3"
                 {...register('releaseDate')}
@@ -144,6 +162,7 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
                 type="text"
                 inputMode="decimal"
                 placeholder={t('addBook.fieldPrice')}
+                disabled={isSubmitting}
                 aria-invalid={Boolean(errors.price)}
                 className="h-11 bg-card px-3"
                 {...register('price')}
@@ -161,7 +180,7 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
               className="mt-1 h-11 w-full text-base"
               disabled={isSubmitting}
             >
-              {t('addBook.add')}
+              {isSubmitting ? t('addBook.adding') : t('addBook.add')}
             </Button>
           </form>
         </section>
