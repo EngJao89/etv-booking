@@ -1,6 +1,5 @@
 import Axios from 'axios'
-
-const ACCESS_TOKEN_KEY = 'etv-access-token'
+import { getAccessToken } from '@/lib/session'
 
 export const axios = Axios.create({
   baseURL: import.meta.env.VITE_API_URL || '',
@@ -12,17 +11,15 @@ export const axios = Axios.create({
 
 export function setAuthToken(token: string | null) {
   if (token) {
-    sessionStorage.setItem(ACCESS_TOKEN_KEY, token)
     axios.defaults.headers.common.Authorization = `Bearer ${token}`
     return
   }
 
-  sessionStorage.removeItem(ACCESS_TOKEN_KEY)
   delete axios.defaults.headers.common.Authorization
 }
 
 axios.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem(ACCESS_TOKEN_KEY)
+  const token = getAccessToken()
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }

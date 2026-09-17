@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { initialBooks } from '@/data/books'
 import { setAuthToken } from '@/lib/axios'
+import { clearSession, loadSession, saveSession } from '@/lib/session'
 import { AddBookPage } from '@/pages/add-book'
 import { BooksPage } from '@/pages/books'
 import { LoginPage } from '@/pages/login'
@@ -10,7 +11,7 @@ import type { Book } from '@/types/book'
 type Screen = 'books' | 'add-book'
 
 function App() {
-  const [session, setSession] = useState<AuthSession | null>(null)
+  const [session, setSession] = useState<AuthSession | null>(loadSession)
   const [screen, setScreen] = useState<Screen>('books')
   const [books, setBooks] = useState(initialBooks)
 
@@ -19,11 +20,13 @@ function App() {
   }, [session])
 
   function handleLogin(nextSession: AuthSession) {
+    saveSession(nextSession)
     setAuthToken(nextSession.accessToken)
     setSession(nextSession)
   }
 
   function handleLogout() {
+    clearSession()
     setAuthToken(null)
     setSession(null)
     setScreen('books')
