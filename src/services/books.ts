@@ -87,6 +87,113 @@ export function mapBookFromApi(data: BookApiResponse): Book {
   }
 }
 
+function getListBooksErrorMessage(error: unknown) {
+  if (!isAxiosError(error)) {
+    return i18n.t('books.unableToLoad')
+  }
+
+  if (!error.response) {
+    return i18n.t('books.couldNotReachServer')
+  }
+
+  const { status, data } = error.response
+
+  if (status === 401 || status === 403) {
+    return i18n.t('books.unauthorized')
+  }
+
+  return getApiMessage(data) ?? i18n.t('books.unableToLoad')
+}
+
+function isBookApiResponse(value: unknown): value is BookApiResponse {
+  return Boolean(
+    value &&
+      typeof value === 'object' &&
+      'id' in value &&
+      'title' in value &&
+      'author' in value,
+  )
+}
+
+function extractBookList(data: unknown): BookApiResponse[] {
+  if (Array.isArray(data)) {
+    return data.filter(isBookApiResponse)
+  }
+
+  if (!data || typeof data !== 'object') {
+    return []
+  }
+
+  if ('content' in data && Array.isArray(data.content)) {
+    return data.content.filter(isBookApiResponse)
+  }
+
+  if ('_embedded' in data && data._embedded && typeof data._embedded === 'object') {
+    for (const value of Object.values(data._embedded as Record<string, unknown>)) {
+      if (Array.isArray(value)) {
+        return value.filter(isBookApiResponse)
+      }
+    }
+  }
+
+  return []
+}
+
+function getTotalElements(data: unknown) {
+  if (!data || typeof data !== 'object') {
+    return undefined
+  }
+
+  if (
+    'page' in data &&
+    data.page &&
+    typeof data.page === 'object' &&
+    'totalElements' in data.page &&
+    typeof data.page.totalElements === 'number'
+  ) {
+    return data.page.totalElements
+  }
+
+  if ('totalElements' in data && typeof data.totalElements === 'number') {
+    return data.totalElements
+  }
+
+  return undefined
+}
+
+async function fetchBooksPage(page: number, size: number) {
+  const { data } = await axios.get<unknown>('/api/book/v1', {
+    params: {
+      page,
+      size,
+      direction: 'asc',
+    },
+  })
+
+  return {
+    books: extractBookList(data).map(mapBookFromApi),
+    totalElements: getTotalElements(data),
+  }
+}
+
+export async function listBooks(): Promise<Book[]> {
+  try {
+    const firstPage = await fetchBooksPage(0, 12)
+
+    if (
+      typeof firstPage.totalElements === 'number' &&
+      firstPage.totalElements > firstPage.books.length
+    ) {
+      const allBooks = await fetchBooksPage(0, firstPage.totalElements)
+      return allBooks.books
+    }
+
+    return firstPage.books
+  } catch (error) {
+    throw new Error(getListBooksErrorMessage(error))
+  }
+}
+
 export async function createBook(payload: CreateBookPayload): Promise<Book> {
   try {
     const { data } = await axios.post<BookApiResponse>('/api/book/v1', {

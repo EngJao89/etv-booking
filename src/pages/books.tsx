@@ -10,6 +10,8 @@ import type { Book } from '@/types/book'
 type BooksPageProps = {
   username: string
   books: Book[]
+  isLoading: boolean
+  error: string | null
   onAddNewBook: () => void
   onDelete: (id: string) => void
   onLogout: () => void
@@ -18,6 +20,8 @@ type BooksPageProps = {
 export function BooksPage({
   username,
   books,
+  isLoading,
+  error,
   onAddNewBook,
   onDelete,
   onLogout,
@@ -62,19 +66,39 @@ export function BooksPage({
             {t('books.registeredBooks')}
           </h1>
 
-          {books.length === 0 ? (
+          {error ? (
+            <Card className="shadow-sm">
+              <CardContent>
+                <p role="alert" className="text-sm text-destructive">
+                  {error}
+                </p>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {isLoading && books.length === 0 ? (
+            <Card className="shadow-sm">
+              <CardContent>
+                <p className="text-muted-foreground">{t('books.loading')}</p>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {!isLoading && !error && books.length === 0 ? (
             <Card className="shadow-sm">
               <CardContent>
                 <p className="text-muted-foreground">{t('books.empty')}</p>
               </CardContent>
             </Card>
-          ) : (
+          ) : null}
+
+          {books.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {books.map((book) => (
                 <BookCard key={book.id} book={book} onDelete={onDelete} />
               ))}
             </div>
-          )}
+          ) : null}
         </section>
       </div>
     </main>
