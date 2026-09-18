@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
 import { setAuthToken } from '@/lib/axios'
-import { clearSession, loadSession, saveSession } from '@/lib/session'
+import {
+  SESSION_EXPIRED_EVENT,
+  clearSession,
+  loadSession,
+  saveSession,
+} from '@/lib/session'
 import { AddBookPage } from '@/pages/add-book'
 import { BooksPage } from '@/pages/books'
 import { LoginPage } from '@/pages/login'
@@ -11,18 +16,29 @@ import type { Book } from '@/types/book'
 type Screen = 'books' | 'add-book'
 
 function App() {
-  const [session, setSession] = useState<AuthSession | null>(loadSession)
+  const [session, setSession] = useState<AuthSession | null>(() => loadSession())
   const [screen, setScreen] = useState<Screen>('books')
   const [books, setBooks] = useState<Book[]>([])
   const [isLoadingBooks, setIsLoadingBooks] = useState(false)
   const [booksError, setBooksError] = useState<string | null>(null)
 
   useEffect(() => {
-    setAuthToken(session?.accessToken ?? null)
-  }, [session])
+    function onSessionExpired() {
+      setAuthToken(null)
+      setSession(null)
+      setScreen('books')
+      setBooks([])
+      setBooksError(null)
+    }
+
+    window.addEventListener(SESSION_EXPIRED_EVENT, onSessionExpired)
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onSessionExpired)
+  }, [])
 
   useEffect(() => {
-    if (!session || screen !== 'books') {
+    setAuthToken(session?.accessToken ?? null)
+
+    if (!session?.accessToken || screen !== 'books') {
       return
     }
 
