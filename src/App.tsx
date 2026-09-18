@@ -9,7 +9,7 @@ import {
 import { AddBookPage } from '@/pages/add-book'
 import { BooksPage } from '@/pages/books'
 import { LoginPage } from '@/pages/login'
-import { listBooks } from '@/services/books'
+import { deleteBook, listBooks } from '@/services/books'
 import type { AuthSession } from '@/types/auth'
 import type { Book } from '@/types/book'
 
@@ -21,6 +21,7 @@ function App() {
   const [books, setBooks] = useState<Book[]>([])
   const [isLoadingBooks, setIsLoadingBooks] = useState(false)
   const [booksError, setBooksError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     function onSessionExpired() {
@@ -29,6 +30,7 @@ function App() {
       setScreen('books')
       setBooks([])
       setBooksError(null)
+      setDeletingId(null)
     }
 
     window.addEventListener(SESSION_EXPIRED_EVENT, onSessionExpired)
@@ -86,6 +88,7 @@ function App() {
     setScreen('books')
     setBooks([])
     setBooksError(null)
+    setDeletingId(null)
   }
 
   function handleHome() {
@@ -96,8 +99,20 @@ function App() {
     setScreen('add-book')
   }
 
-  function handleDelete(id: string) {
-    setBooks((current) => current.filter((book) => book.id !== id))
+  async function handleDelete(id: string) {
+    setDeletingId(id)
+    setBooksError(null)
+
+    try {
+      await deleteBook(id)
+      setBooks((current) => current.filter((book) => book.id !== id))
+    } catch (error_) {
+      setBooksError(
+        error_ instanceof Error ? error_.message : String(error_),
+      )
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   function handleAddBook(book: Book) {
@@ -119,6 +134,7 @@ function App() {
       books={books}
       isLoading={isLoadingBooks}
       error={booksError}
+      deletingId={deletingId}
       onAddNewBook={handleAddNewBook}
       onDelete={handleDelete}
       onLogout={handleLogout}

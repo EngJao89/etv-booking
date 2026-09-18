@@ -20,10 +20,11 @@ function BookField({ label, value }: Readonly<{ label: string; value: string }>)
 
 type BookCardProps = {
   book: Book
+  isDeleting: boolean
   onDelete: (id: string) => void
 }
 
-export function BookCard({ book, onDelete }: Readonly<BookCardProps>) {
+export function BookCard({ book, isDeleting, onDelete }: Readonly<BookCardProps>) {
   const { t, i18n } = useTranslation()
   const priceFormatter = new Intl.NumberFormat(i18n.language, {
     style: 'currency',
@@ -54,7 +55,12 @@ export function BookCard({ book, onDelete }: Readonly<BookCardProps>) {
             type="button"
             variant="ghost"
             size="icon-xs"
-            aria-label={t('books.delete', { title: book.title })}
+            aria-label={
+              isDeleting
+                ? t('books.deleting', { title: book.title })
+                : t('books.delete', { title: book.title })
+            }
+            disabled={isDeleting}
             onClick={() => onDelete(book.id)}
           >
             <Trash2Icon className="size-4 text-primary" />

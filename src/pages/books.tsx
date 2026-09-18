@@ -12,6 +12,7 @@ type BooksPageProps = {
   books: Book[]
   isLoading: boolean
   error: string | null
+  deletingId: string | null
   onAddNewBook: () => void
   onDelete: (id: string) => void
   onLogout: () => void
@@ -22,6 +23,7 @@ export function BooksPage({
   books,
   isLoading,
   error,
+  deletingId,
   onAddNewBook,
   onDelete,
   onLogout,
@@ -95,7 +97,12 @@ export function BooksPage({
           {books.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {books.map((book) => (
-                <BookCard key={book.id} book={book} onDelete={onDelete} />
+                <BookCard
+                  key={book.id}
+                  book={book}
+                  isDeleting={deletingId === book.id}
+                  onDelete={onDelete}
+                />
               ))}
             </div>
           ) : null}
