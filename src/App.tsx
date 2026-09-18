@@ -8,12 +8,13 @@ import {
 } from '@/lib/session'
 import { AddBookPage } from '@/pages/add-book'
 import { BooksPage } from '@/pages/books'
+import { EditBookPage } from '@/pages/edit-book'
 import { LoginPage } from '@/pages/login'
 import { deleteBook, listBooks } from '@/services/books'
 import type { AuthSession } from '@/types/auth'
 import type { Book } from '@/types/book'
 
-type Screen = 'books' | 'add-book'
+type Screen = 'books' | 'add-book' | 'edit-book'
 
 function App() {
   const [session, setSession] = useState<AuthSession | null>(() => loadSession())
@@ -22,6 +23,7 @@ function App() {
   const [isLoadingBooks, setIsLoadingBooks] = useState(false)
   const [booksError, setBooksError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   useEffect(() => {
     function onSessionExpired() {
@@ -31,6 +33,7 @@ function App() {
       setBooks([])
       setBooksError(null)
       setDeletingId(null)
+      setEditingId(null)
     }
 
     window.addEventListener(SESSION_EXPIRED_EVENT, onSessionExpired)
@@ -89,14 +92,21 @@ function App() {
     setBooks([])
     setBooksError(null)
     setDeletingId(null)
+    setEditingId(null)
   }
 
   function handleHome() {
+    setEditingId(null)
     setScreen('books')
   }
 
   function handleAddNewBook() {
     setScreen('add-book')
+  }
+
+  function handleEdit(id: string) {
+    setEditingId(id)
+    setScreen('edit-book')
   }
 
   async function handleDelete(id: string) {
@@ -120,12 +130,26 @@ function App() {
     setScreen('books')
   }
 
+  function handleSaveBook(book: Book) {
+    setBooks((current) =>
+      current.map((item) => (item.id === book.id ? book : item)),
+    )
+    setEditingId(null)
+    setScreen('books')
+  }
+
   if (!session) {
     return <LoginPage onLogin={handleLogin} />
   }
 
   if (screen === 'add-book') {
     return <AddBookPage onHome={handleHome} onAdd={handleAddBook} />
+  }
+
+  if (screen === 'edit-book' && editingId) {
+    return (
+      <EditBookPage bookId={editingId} onHome={handleHome} onSave={handleSaveBook} />
+    )
   }
 
   return (
@@ -136,6 +160,7 @@ function App() {
       error={booksError}
       deletingId={deletingId}
       onAddNewBook={handleAddNewBook}
+      onEdit={handleEdit}
       onDelete={handleDelete}
       onLogout={handleLogout}
     />
