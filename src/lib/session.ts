@@ -3,19 +3,28 @@ import type { AuthSession } from '@/types/auth'
 const SESSION_KEY = 'etv-session'
 const LEGACY_TOKEN_KEY = 'etv-access-token'
 
-function isAuthSession(value: unknown): value is AuthSession {
+export const SESSION_EXPIRED_EVENT = 'etv-session-expired'
+
+function toAuthSession(value: unknown): AuthSession | null {
   if (!value || typeof value !== 'object') {
-    return false
+    return null
   }
 
   const session = value as Partial<AuthSession>
-  return (
-    typeof session.username === 'string' &&
-    session.username.length > 0 &&
-    typeof session.accessToken === 'string' &&
-    session.accessToken.length > 0 &&
-    typeof session.refreshToken === 'string'
-  )
+  if (
+    typeof session.username !== 'string' ||
+    session.username.length === 0 ||
+    typeof session.accessToken !== 'string' ||
+    session.accessToken.length === 0
+  ) {
+    return null
+  }
+
+  return {
+    username: session.username,
+    accessToken: session.accessToken,
+    refreshToken: typeof session.refreshToken === 'string' ? session.refreshToken : '',
+  }
 }
 
 export function loadSession(): AuthSession | null {
@@ -26,13 +35,13 @@ export function loadSession(): AuthSession | null {
       return null
     }
 
-    const parsed: unknown = JSON.parse(raw)
-    if (!isAuthSession(parsed)) {
+    const session = toAuthSession(JSON.parse(raw))
+    if (!session) {
       localStorage.removeItem(SESSION_KEY)
       return null
     }
 
-    return parsed
+    return session
   } catch {
     localStorage.removeItem(SESSION_KEY)
     return null
@@ -49,6 +58,15 @@ export function clearSession() {
   sessionStorage.removeItem(LEGACY_TOKEN_KEY)
 }
 
+export function expireSession() {
+  clearSession()
+  window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT))
+}
+
 export function getAccessToken() {
   return loadSession()?.accessToken ?? null
+}
+
+export function getRefreshToken() {
+  return loadSession()?.refreshToken ?? null
 }

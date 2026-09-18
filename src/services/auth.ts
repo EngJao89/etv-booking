@@ -1,5 +1,6 @@
 import { isAxiosError } from 'axios'
 import i18n from '@/i18n'
+import { getApiErrorMessage } from '@/lib/api-error'
 import { axios } from '@/lib/axios'
 import type { AuthSession, SignInRequest, SignInResponse } from '@/types/auth'
 
@@ -13,28 +14,13 @@ function getSignInErrorMessage(error: unknown) {
   }
 
   const { status, data } = error.response
-  let apiMessage: string | undefined
-
-  if (typeof data === 'string') {
-    apiMessage = data
-  } else if (
-    data &&
-    typeof data === 'object' &&
-    'message' in data &&
-    typeof data.message === 'string'
-  ) {
-    apiMessage = data.message
-  }
+  const apiMessage = getApiErrorMessage(data)
 
   if (status === 401 || status === 403 || apiMessage === 'Bad credentials') {
     return i18n.t('signIn.invalidCredentials')
   }
 
-  if (apiMessage) {
-    return apiMessage
-  }
-
-  return i18n.t('signIn.unableToSignIn')
+  return apiMessage ?? i18n.t('signIn.unableToSignIn')
 }
 
 export async function signIn(payload: SignInRequest): Promise<AuthSession> {
@@ -48,7 +34,7 @@ export async function signIn(payload: SignInRequest): Promise<AuthSession> {
     return {
       username: data.username,
       accessToken: data.accessToken,
-      refreshToken: data.refreshToken,
+      refreshToken: data.refreshToken ?? '',
     }
   } catch (error) {
     throw new Error(getSignInErrorMessage(error))

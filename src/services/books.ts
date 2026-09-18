@@ -1,5 +1,6 @@
 import { isAxiosError } from 'axios'
 import i18n from '@/i18n'
+import { getApiErrorMessage } from '@/lib/api-error'
 import { axios } from '@/lib/axios'
 import type { Book } from '@/types/book'
 
@@ -18,30 +19,6 @@ type BookApiResponse = {
   launchDate: string | number | number[]
 }
 
-function getApiMessage(data: unknown) {
-  if (typeof data === 'string' && data.trim()) {
-    return data
-  }
-
-  if (!data || typeof data !== 'object') {
-    return undefined
-  }
-
-  if ('message' in data && typeof data.message === 'string' && data.message.trim()) {
-    return data.message
-  }
-
-  if ('detail' in data && typeof data.detail === 'string' && data.detail.trim()) {
-    return data.detail
-  }
-
-  if ('title' in data && typeof data.title === 'string' && data.title.trim()) {
-    return data.title
-  }
-
-  return undefined
-}
-
 function getCreateBookErrorMessage(error: unknown) {
   if (!isAxiosError(error)) {
     return i18n.t('addBook.unableToAdd')
@@ -57,7 +34,7 @@ function getCreateBookErrorMessage(error: unknown) {
     return i18n.t('addBook.unauthorized')
   }
 
-  return getApiMessage(data) ?? i18n.t('addBook.unableToAdd')
+  return getApiErrorMessage(data) ?? i18n.t('addBook.unableToAdd')
 }
 
 function toReleaseDate(launchDate: BookApiResponse['launchDate']) {
@@ -102,7 +79,7 @@ function getListBooksErrorMessage(error: unknown) {
     return i18n.t('books.unauthorized')
   }
 
-  return getApiMessage(data) ?? i18n.t('books.unableToLoad')
+  return getApiErrorMessage(data) ?? i18n.t('books.unableToLoad')
 }
 
 function isBookApiResponse(value: unknown): value is BookApiResponse {
