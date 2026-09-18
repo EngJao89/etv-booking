@@ -36,7 +36,9 @@
     "price": "Price:",
     "releaseDate": "Release Date:",
     "edit": "Edit {{title}}",
-    "delete": "Delete {{title}}"
+    "delete": "Delete {{title}}",
+    "deleting": "Deleting {{title}}",
+    "unableToDelete": "Unable to delete the book. Please try again."
   },
   "addBook": {
     "title": "Add New Book",

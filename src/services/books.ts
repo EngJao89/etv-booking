@@ -82,6 +82,28 @@ function getListBooksErrorMessage(error: unknown) {
   return getApiErrorMessage(data) ?? i18n.t('books.unableToLoad')
 }
 
+function getDeleteBookErrorMessage(error: unknown) {
+  if (!isAxiosError(error)) {
+    return i18n.t('books.unableToDelete')
+  }
+
+  if (!error.response) {
+    return i18n.t('books.couldNotReachServer')
+  }
+
+  const { status, data } = error.response
+
+  if (status === 401 || status === 403) {
+    return i18n.t('books.unauthorized')
+  }
+
+  if (status === 404) {
+    return i18n.t('books.unableToDelete')
+  }
+
+  return getApiErrorMessage(data) ?? i18n.t('books.unableToDelete')
+}
+
 function isBookApiResponse(value: unknown): value is BookApiResponse {
   return Boolean(
     value &&
@@ -183,5 +205,17 @@ export async function createBook(payload: CreateBookPayload): Promise<Book> {
     return mapBookFromApi(data)
   } catch (error) {
     throw new Error(getCreateBookErrorMessage(error))
+  }
+}
+
+export async function deleteBook(id: string): Promise<void> {
+  try {
+    await axios.delete(`/api/book/v1/${encodeURIComponent(id)}`)
+  } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 404) {
+      return
+    }
+
+    throw new Error(getDeleteBookErrorMessage(error))
   }
 }
