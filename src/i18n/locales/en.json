@@ -40,6 +40,20 @@
     "deleting": "Deleting {{title}}",
     "unableToDelete": "Unable to delete the book. Please try again."
   },
+  "editBook": {
+    "title": "Edit Book",
+    "descriptionLine1": "Update the book information and click on",
+    "descriptionLine2": "'Save'!",
+    "home": "Home",
+    "save": "Save",
+    "saving": "Saving...",
+    "loading": "Loading book...",
+    "unableToLoad": "Unable to load the book. Please try again.",
+    "unableToSave": "Unable to save the book. Please try again.",
+    "couldNotReachServer": "Could not reach the server. Please try again.",
+    "unauthorized": "You are not authorized to edit this book. Please sign in again.",
+    "notFound": "This book could not be found."
+  },
   "addBook": {
     "title": "Add New Book",
     "descriptionLine1": "Enter the book information and click on",

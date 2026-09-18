@@ -11,6 +11,10 @@ export type CreateBookPayload = {
   launchDate: string
 }
 
+export type UpdateBookPayload = CreateBookPayload & {
+  id: string
+}
+
 type BookApiResponse = {
   id: number
   title: string
@@ -102,6 +106,50 @@ function getDeleteBookErrorMessage(error: unknown) {
   }
 
   return getApiErrorMessage(data) ?? i18n.t('books.unableToDelete')
+}
+
+function getBookByIdErrorMessage(error: unknown) {
+  if (!isAxiosError(error)) {
+    return i18n.t('editBook.unableToLoad')
+  }
+
+  if (!error.response) {
+    return i18n.t('editBook.couldNotReachServer')
+  }
+
+  const { status, data } = error.response
+
+  if (status === 401 || status === 403) {
+    return i18n.t('editBook.unauthorized')
+  }
+
+  if (status === 404) {
+    return i18n.t('editBook.notFound')
+  }
+
+  return getApiErrorMessage(data) ?? i18n.t('editBook.unableToLoad')
+}
+
+function getUpdateBookErrorMessage(error: unknown) {
+  if (!isAxiosError(error)) {
+    return i18n.t('editBook.unableToSave')
+  }
+
+  if (!error.response) {
+    return i18n.t('editBook.couldNotReachServer')
+  }
+
+  const { status, data } = error.response
+
+  if (status === 401 || status === 403) {
+    return i18n.t('editBook.unauthorized')
+  }
+
+  if (status === 404) {
+    return i18n.t('editBook.notFound')
+  }
+
+  return getApiErrorMessage(data) ?? i18n.t('editBook.unableToSave')
 }
 
 function isBookApiResponse(value: unknown): value is BookApiResponse {
@@ -217,5 +265,39 @@ export async function deleteBook(id: string): Promise<void> {
     }
 
     throw new Error(getDeleteBookErrorMessage(error))
+  }
+}
+
+export async function getBook(id: string): Promise<Book> {
+  try {
+    const { data } = await axios.get<unknown>(`/api/book/v1/${encodeURIComponent(id)}`)
+
+    if (!isBookApiResponse(data)) {
+      throw new Error(i18n.t('editBook.unableToLoad'))
+    }
+
+    return mapBookFromApi(data)
+  } catch (error) {
+    if (error instanceof Error && !isAxiosError(error)) {
+      throw error
+    }
+
+    throw new Error(getBookByIdErrorMessage(error))
+  }
+}
+
+export async function updateBook(payload: UpdateBookPayload): Promise<Book> {
+  try {
+    const { data } = await axios.put<BookApiResponse>('/api/book/v1', {
+      id: Number(payload.id),
+      author: payload.author,
+      launchDate: payload.launchDate,
+      price: payload.price,
+      title: payload.title,
+    })
+
+    return mapBookFromApi(data)
+  } catch (error) {
+    throw new Error(getUpdateBookErrorMessage(error))
   }
 }
