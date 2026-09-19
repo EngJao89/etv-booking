@@ -6,6 +6,13 @@ import logo from '@/assets/logo.svg'
 import padlock from '@/assets/padlock.png'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { createSignInSchema, type SignInFormValues } from '@/schemas/sign-in'
 import { signIn } from '@/services/auth'
@@ -62,55 +69,45 @@ export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
                 {t('signIn.title')}
               </h1>
 
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-col gap-1">
-                  <label htmlFor="username" className="sr-only">
-                    {t('signIn.username')}
-                  </label>
-                  <Input
-                    id="username"
-                    type="text"
-                    placeholder={t('signIn.username')}
-                    autoComplete="username"
-                    disabled={isSubmitting}
-                    aria-invalid={Boolean(errors.username)}
-                    className="h-11 bg-card px-3"
-                    {...register('username')}
-                  />
-                  {errors.username ? (
-                    <p role="alert" className="text-sm text-destructive">
-                      {errors.username.message}
-                    </p>
-                  ) : null}
-                </div>
+              <FieldSet className="min-w-0 gap-3 border-0 p-0">
+                <FieldGroup className="gap-3">
+                  <Field data-invalid={Boolean(errors.username) || undefined}>
+                    <FieldLabel htmlFor="username" className="sr-only">
+                      {t('signIn.username')}
+                    </FieldLabel>
+                    <Input
+                      id="username"
+                      type="text"
+                      placeholder={t('signIn.username')}
+                      autoComplete="username"
+                      disabled={isSubmitting}
+                      aria-invalid={Boolean(errors.username)}
+                      className="h-11 bg-card px-3"
+                      {...register('username')}
+                    />
+                    <FieldError errors={[errors.username]} />
+                  </Field>
 
-                <div className="flex flex-col gap-1">
-                  <label htmlFor="password" className="sr-only">
-                    {t('signIn.password')}
-                  </label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder={t('signIn.password')}
-                    autoComplete="current-password"
-                    disabled={isSubmitting}
-                    aria-invalid={Boolean(errors.password)}
-                    className="h-11 bg-card px-3"
-                    {...register('password')}
-                  />
-                  {errors.password ? (
-                    <p role="alert" className="text-sm text-destructive">
-                      {errors.password.message}
-                    </p>
-                  ) : null}
-                </div>
-              </div>
+                  <Field data-invalid={Boolean(errors.password) || undefined}>
+                    <FieldLabel htmlFor="password" className="sr-only">
+                      {t('signIn.password')}
+                    </FieldLabel>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder={t('signIn.password')}
+                      autoComplete="current-password"
+                      disabled={isSubmitting}
+                      aria-invalid={Boolean(errors.password)}
+                      className="h-11 bg-card px-3"
+                      {...register('password')}
+                    />
+                    <FieldError errors={[errors.password]} />
+                  </Field>
+                </FieldGroup>
+              </FieldSet>
 
-              {errors.root ? (
-                <p role="alert" className="text-sm text-destructive">
-                  {errors.root.message}
-                </p>
-              ) : null}
+              {errors.root ? <FieldError>{errors.root.message}</FieldError> : null}
 
               <Button
                 type="submit"
