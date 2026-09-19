@@ -6,6 +6,13 @@ import { useTranslation } from 'react-i18next'
 import logo from '@/assets/logo.svg'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSet,
+} from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { createAddBookSchema, parsePrice, type AddBookFormValues } from '@/schemas/add-book'
 import { createBook } from '@/services/books'
@@ -88,91 +95,76 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
             onSubmit={handleSubmit(onSubmit)}
             className="flex w-full max-w-md flex-col gap-3"
           >
-            {errors.root ? (
-              <p role="alert" className="text-sm text-destructive">
-                {errors.root.message}
-              </p>
-            ) : null}
-            <div className="flex flex-col gap-1">
-              <label htmlFor="title" className="sr-only">
-                {t('addBook.fieldTitle')}
-              </label>
-              <Input
-                id="title"
-                type="text"
-                placeholder={t('addBook.fieldTitle')}
-                disabled={isSubmitting}
-                aria-invalid={Boolean(errors.title)}
-                className="h-11 bg-card px-3"
-                {...register('title')}
-              />
-              {errors.title ? (
-                <p role="alert" className="text-sm text-destructive">
-                  {errors.title.message}
-                </p>
-              ) : null}
-            </div>
+            <FieldSet className="min-w-0 gap-3 border-0 p-0">
+              <FieldGroup className="gap-3">
+                {errors.root ? <FieldError>{errors.root.message}</FieldError> : null}
 
-            <div className="flex flex-col gap-1">
-              <label htmlFor="author" className="sr-only">
-                {t('addBook.fieldAuthor')}
-              </label>
-              <Input
-                id="author"
-                type="text"
-                placeholder={t('addBook.fieldAuthor')}
-                disabled={isSubmitting}
-                aria-invalid={Boolean(errors.author)}
-                className="h-11 bg-card px-3"
-                {...register('author')}
-              />
-              {errors.author ? (
-                <p role="alert" className="text-sm text-destructive">
-                  {errors.author.message}
-                </p>
-              ) : null}
-            </div>
+                <Field data-invalid={Boolean(errors.title) || undefined}>
+                  <FieldLabel htmlFor="title" className="sr-only">
+                    {t('addBook.fieldTitle')}
+                  </FieldLabel>
+                  <Input
+                    id="title"
+                    type="text"
+                    placeholder={t('addBook.fieldTitle')}
+                    disabled={isSubmitting}
+                    aria-invalid={Boolean(errors.title)}
+                    className="h-11 bg-card px-3"
+                    {...register('title')}
+                  />
+                  <FieldError errors={[errors.title]} />
+                </Field>
 
-            <div className="flex flex-col gap-1">
-              <label htmlFor="releaseDate" className="sr-only">
-                {t('addBook.fieldReleaseDate')}
-              </label>
-              <Input
-                id="releaseDate"
-                type="date"
-                lang={i18n.language}
-                disabled={isSubmitting}
-                aria-invalid={Boolean(errors.releaseDate)}
-                className="h-11 bg-card px-3"
-                {...register('releaseDate')}
-              />
-              {errors.releaseDate ? (
-                <p role="alert" className="text-sm text-destructive">
-                  {errors.releaseDate.message}
-                </p>
-              ) : null}
-            </div>
+                <Field data-invalid={Boolean(errors.author) || undefined}>
+                  <FieldLabel htmlFor="author" className="sr-only">
+                    {t('addBook.fieldAuthor')}
+                  </FieldLabel>
+                  <Input
+                    id="author"
+                    type="text"
+                    placeholder={t('addBook.fieldAuthor')}
+                    disabled={isSubmitting}
+                    aria-invalid={Boolean(errors.author)}
+                    className="h-11 bg-card px-3"
+                    {...register('author')}
+                  />
+                  <FieldError errors={[errors.author]} />
+                </Field>
 
-            <div className="flex flex-col gap-1">
-              <label htmlFor="price" className="sr-only">
-                {t('addBook.fieldPrice')}
-              </label>
-              <Input
-                id="price"
-                type="text"
-                inputMode="decimal"
-                placeholder={t('addBook.fieldPrice')}
-                disabled={isSubmitting}
-                aria-invalid={Boolean(errors.price)}
-                className="h-11 bg-card px-3"
-                {...register('price')}
-              />
-              {errors.price ? (
-                <p role="alert" className="text-sm text-destructive">
-                  {errors.price.message}
-                </p>
-              ) : null}
-            </div>
+                <Field data-invalid={Boolean(errors.releaseDate) || undefined}>
+                  <FieldLabel htmlFor="releaseDate" className="sr-only">
+                    {t('addBook.fieldReleaseDate')}
+                  </FieldLabel>
+                  <Input
+                    id="releaseDate"
+                    type="date"
+                    lang={i18n.language}
+                    disabled={isSubmitting}
+                    aria-invalid={Boolean(errors.releaseDate)}
+                    className="h-11 bg-card px-3"
+                    {...register('releaseDate')}
+                  />
+                  <FieldError errors={[errors.releaseDate]} />
+                </Field>
+
+                <Field data-invalid={Boolean(errors.price) || undefined}>
+                  <FieldLabel htmlFor="price" className="sr-only">
+                    {t('addBook.fieldPrice')}
+                  </FieldLabel>
+                  <Input
+                    id="price"
+                    type="text"
+                    inputMode="decimal"
+                    placeholder={t('addBook.fieldPrice')}
+                    disabled={isSubmitting}
+                    aria-invalid={Boolean(errors.price)}
+                    className="h-11 bg-card px-3"
+                    {...register('price')}
+                  />
+                  <FieldError errors={[errors.price]} />
+                </Field>
+              </FieldGroup>
+            </FieldSet>
 
             <Button
               type="submit"
