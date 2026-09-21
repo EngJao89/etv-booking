@@ -20,9 +20,10 @@ import type { AuthSession } from '@/types/auth'
 
 type LoginPageProps = {
   onLogin: (session: AuthSession) => void
+  onNewUser: () => void
 }
 
-export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
+export function LoginPage({ onLogin, onNewUser }: Readonly<LoginPageProps>) {
   const { t } = useTranslation()
   const signInSchema = useMemo(() => createSignInSchema(t), [t])
   const {
@@ -116,6 +117,17 @@ export function LoginPage({ onLogin }: Readonly<LoginPageProps>) {
                 disabled={isSubmitting}
               >
                 {isSubmitting ? t('signIn.signingIn') : t('signIn.login')}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                className="h-11 w-full bg-card text-base"
+                disabled={isSubmitting}
+                onClick={onNewUser}
+              >
+                {t('signIn.newUser')}
               </Button>
             </div>
           </form>
