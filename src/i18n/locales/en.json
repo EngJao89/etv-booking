@@ -19,7 +19,30 @@
     "passwordRequired": "Password is required",
     "unableToSignIn": "Unable to sign in. Please try again.",
     "couldNotReachServer": "Could not reach the server. Please try again.",
-    "invalidCredentials": "Invalid username or password."
+    "invalidCredentials": "Invalid username or password.",
+    "newUser": "New User"
+  },
+  "newUser": {
+    "title": "New User",
+    "descriptionLine1": "Enter the user information and click on",
+    "descriptionLine2": "'Create'!",
+    "backToLogin": "Back to login",
+    "fieldFirstName": "First name",
+    "fieldLastName": "Last name",
+    "fieldAddress": "Address",
+    "fieldGender": "Gender",
+    "fieldProfileUrl": "Profile URL",
+    "fieldPhotoUrl": "Photo URL",
+    "fieldEnabled": "Enabled",
+    "create": "Create",
+    "creating": "Creating...",
+    "firstNameRequired": "First name is required",
+    "lastNameRequired": "Last name is required",
+    "addressRequired": "Address is required",
+    "genderRequired": "Gender is required",
+    "unableToCreate": "Unable to create the user. Please try again.",
+    "couldNotReachServer": "Could not reach the server. Please try again.",
+    "unauthorized": "You are not authorized to create a user. Please sign in again."
   },
   "books": {
     "welcome": "Welcome, <name>{{username}}</name>!",

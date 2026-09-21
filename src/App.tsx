@@ -10,14 +10,17 @@ import { AddBookPage } from '@/pages/add-book'
 import { BooksPage } from '@/pages/books'
 import { EditBookPage } from '@/pages/edit-book'
 import { LoginPage } from '@/pages/login'
+import { NewUserPage } from '@/pages/new-user'
 import { deleteBook, listBooks } from '@/services/books'
 import type { AuthSession } from '@/types/auth'
 import type { Book } from '@/types/book'
 
+type AuthScreen = 'login' | 'new-user'
 type Screen = 'books' | 'add-book' | 'edit-book'
 
 function App() {
   const [session, setSession] = useState<AuthSession | null>(() => loadSession())
+  const [authScreen, setAuthScreen] = useState<AuthScreen>('login')
   const [screen, setScreen] = useState<Screen>('books')
   const [books, setBooks] = useState<Book[]>([])
   const [isLoadingBooks, setIsLoadingBooks] = useState(false)
@@ -29,6 +32,7 @@ function App() {
     function onSessionExpired() {
       setAuthToken(null)
       setSession(null)
+      setAuthScreen('login')
       setScreen('books')
       setBooks([])
       setBooksError(null)
@@ -82,17 +86,31 @@ function App() {
     saveSession(nextSession)
     setAuthToken(nextSession.accessToken)
     setSession(nextSession)
+    setAuthScreen('login')
   }
 
   function handleLogout() {
     clearSession()
     setAuthToken(null)
     setSession(null)
+    setAuthScreen('login')
     setScreen('books')
     setBooks([])
     setBooksError(null)
     setDeletingId(null)
     setEditingId(null)
+  }
+
+  function handleNewUser() {
+    setAuthScreen('new-user')
+  }
+
+  function handleBackToLogin() {
+    setAuthScreen('login')
+  }
+
+  function handleUserCreated() {
+    setAuthScreen('login')
   }
 
   function handleHome() {
@@ -139,7 +157,13 @@ function App() {
   }
 
   if (!session) {
-    return <LoginPage onLogin={handleLogin} />
+    if (authScreen === 'new-user') {
+      return (
+        <NewUserPage onBackToLogin={handleBackToLogin} onCreated={handleUserCreated} />
+      )
+    }
+
+    return <LoginPage onLogin={handleLogin} onNewUser={handleNewUser} />
   }
 
   if (screen === 'add-book') {
