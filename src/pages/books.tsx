@@ -14,6 +14,7 @@ type BooksPageProps = {
   error: string | null
   deletingId: string | null
   onAddNewBook: () => void
+  onProfile: () => void
   onEdit: (id: string) => void
   onDelete: (id: string) => void
   onLogout: () => void
@@ -26,6 +27,7 @@ export function BooksPage({
   error,
   deletingId,
   onAddNewBook,
+  onProfile,
   onEdit,
   onDelete,
   onLogout,
@@ -42,7 +44,15 @@ export function BooksPage({
               <Trans
                 i18nKey="books.welcome"
                 values={{ username }}
-                components={{ name: <span className="italic text-primary" /> }}
+                components={{
+                  name: (
+                    <button
+                      type="button"
+                      className="cursor-pointer italic text-primary underline-offset-4 hover:underline"
+                      onClick={onProfile}
+                    />
+                  ),
+                }}
               />
             </p>
           </div>
