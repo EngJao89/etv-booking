@@ -33,7 +33,11 @@ if (storedToken) {
 }
 
 function isAuthUrl(url = '') {
-  return url.includes('/auth/signin') || url.includes('/auth/refresh')
+  return (
+    url.includes('/auth/signin') ||
+    url.includes('/auth/refresh') ||
+    url.includes('/auth/createUser')
+  )
 }
 
 function shouldRefresh(status: number | undefined, data: unknown) {

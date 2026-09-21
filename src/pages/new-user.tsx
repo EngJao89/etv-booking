@@ -15,8 +15,7 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { createNewUserSchema, type NewUserFormValues } from '@/schemas/new-user'
-import { createPerson } from '@/services/persons'
-import { savePersonIdForUser } from '@/lib/person-id'
+import { createUser } from '@/services/auth'
 
 type NewUserPageProps = {
   onBackToLogin: () => void
@@ -34,28 +33,19 @@ export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPagePr
   } = useForm<NewUserFormValues>({
     resolver: zodResolver(newUserSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      address: '',
-      gender: '',
-      enabled: true,
-      profileUrl: '',
-      photoUrl: '',
+      username: '',
+      password: '',
+      fullname: '',
     },
   })
 
   async function onSubmit(values: NewUserFormValues) {
     try {
-      const person = await createPerson({
-        firstName: values.firstName.trim(),
-        lastName: values.lastName.trim(),
-        address: values.address.trim(),
-        gender: values.gender.trim(),
-        enabled: values.enabled,
-        profileUrl: values.profileUrl.trim(),
-        photoUrl: values.photoUrl.trim(),
+      await createUser({
+        username: values.username.trim(),
+        password: values.password,
+        fullname: values.fullname.trim(),
       })
-      savePersonIdForUser(person.firstName, person.id)
       onCreated()
     } catch (error_) {
       setError('root', {
@@ -106,116 +96,55 @@ export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPagePr
               <FieldGroup className="gap-3">
                 {errors.root ? <FieldError>{errors.root.message}</FieldError> : null}
 
-                <Field data-invalid={Boolean(errors.firstName) || undefined}>
-                  <FieldLabel htmlFor="firstName" className="sr-only">
-                    {t('newUser.fieldFirstName')}
+                <Field data-invalid={Boolean(errors.username) || undefined}>
+                  <FieldLabel htmlFor="username" className="sr-only">
+                    {t('newUser.fieldUsername')}
                   </FieldLabel>
                   <Input
-                    id="firstName"
+                    id="username"
                     type="text"
-                    placeholder={t('newUser.fieldFirstName')}
-                    autoComplete="given-name"
+                    placeholder={t('newUser.fieldUsername')}
+                    autoComplete="username"
                     disabled={isSubmitting}
-                    aria-invalid={Boolean(errors.firstName)}
+                    aria-invalid={Boolean(errors.username)}
                     className="h-11 bg-card px-3"
-                    {...register('firstName')}
+                    {...register('username')}
                   />
-                  <FieldError errors={[errors.firstName]} />
+                  <FieldError errors={[errors.username]} />
                 </Field>
 
-                <Field data-invalid={Boolean(errors.lastName) || undefined}>
-                  <FieldLabel htmlFor="lastName" className="sr-only">
-                    {t('newUser.fieldLastName')}
+                <Field data-invalid={Boolean(errors.fullname) || undefined}>
+                  <FieldLabel htmlFor="fullname" className="sr-only">
+                    {t('newUser.fieldFullname')}
                   </FieldLabel>
                   <Input
-                    id="lastName"
+                    id="fullname"
                     type="text"
-                    placeholder={t('newUser.fieldLastName')}
-                    autoComplete="family-name"
+                    placeholder={t('newUser.fieldFullname')}
+                    autoComplete="name"
                     disabled={isSubmitting}
-                    aria-invalid={Boolean(errors.lastName)}
+                    aria-invalid={Boolean(errors.fullname)}
                     className="h-11 bg-card px-3"
-                    {...register('lastName')}
+                    {...register('fullname')}
                   />
-                  <FieldError errors={[errors.lastName]} />
+                  <FieldError errors={[errors.fullname]} />
                 </Field>
 
-                <Field data-invalid={Boolean(errors.address) || undefined}>
-                  <FieldLabel htmlFor="address" className="sr-only">
-                    {t('newUser.fieldAddress')}
+                <Field data-invalid={Boolean(errors.password) || undefined}>
+                  <FieldLabel htmlFor="password" className="sr-only">
+                    {t('newUser.fieldPassword')}
                   </FieldLabel>
                   <Input
-                    id="address"
-                    type="text"
-                    placeholder={t('newUser.fieldAddress')}
-                    autoComplete="street-address"
+                    id="password"
+                    type="password"
+                    placeholder={t('newUser.fieldPassword')}
+                    autoComplete="new-password"
                     disabled={isSubmitting}
-                    aria-invalid={Boolean(errors.address)}
+                    aria-invalid={Boolean(errors.password)}
                     className="h-11 bg-card px-3"
-                    {...register('address')}
+                    {...register('password')}
                   />
-                  <FieldError errors={[errors.address]} />
-                </Field>
-
-                <Field data-invalid={Boolean(errors.gender) || undefined}>
-                  <FieldLabel htmlFor="gender" className="sr-only">
-                    {t('newUser.fieldGender')}
-                  </FieldLabel>
-                  <Input
-                    id="gender"
-                    type="text"
-                    placeholder={t('newUser.fieldGender')}
-                    disabled={isSubmitting}
-                    aria-invalid={Boolean(errors.gender)}
-                    className="h-11 bg-card px-3"
-                    {...register('gender')}
-                  />
-                  <FieldError errors={[errors.gender]} />
-                </Field>
-
-                <Field data-invalid={Boolean(errors.profileUrl) || undefined}>
-                  <FieldLabel htmlFor="profileUrl" className="sr-only">
-                    {t('newUser.fieldProfileUrl')}
-                  </FieldLabel>
-                  <Input
-                    id="profileUrl"
-                    type="text"
-                    placeholder={t('newUser.fieldProfileUrl')}
-                    disabled={isSubmitting}
-                    aria-invalid={Boolean(errors.profileUrl)}
-                    className="h-11 bg-card px-3"
-                    {...register('profileUrl')}
-                  />
-                  <FieldError errors={[errors.profileUrl]} />
-                </Field>
-
-                <Field data-invalid={Boolean(errors.photoUrl) || undefined}>
-                  <FieldLabel htmlFor="photoUrl" className="sr-only">
-                    {t('newUser.fieldPhotoUrl')}
-                  </FieldLabel>
-                  <Input
-                    id="photoUrl"
-                    type="text"
-                    placeholder={t('newUser.fieldPhotoUrl')}
-                    disabled={isSubmitting}
-                    aria-invalid={Boolean(errors.photoUrl)}
-                    className="h-11 bg-card px-3"
-                    {...register('photoUrl')}
-                  />
-                  <FieldError errors={[errors.photoUrl]} />
-                </Field>
-
-                <Field orientation="horizontal" className="items-center gap-2">
-                  <input
-                    id="enabled"
-                    type="checkbox"
-                    disabled={isSubmitting}
-                    className="size-4 rounded border border-input accent-primary"
-                    {...register('enabled')}
-                  />
-                  <FieldLabel htmlFor="enabled" className="font-normal text-foreground">
-                    {t('newUser.fieldEnabled')}
-                  </FieldLabel>
+                  <FieldError errors={[errors.password]} />
                 </Field>
               </FieldGroup>
             </FieldSet>

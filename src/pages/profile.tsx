@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { savePersonIdForUser } from '@/lib/person-id'
-import { createNewUserSchema, type NewUserFormValues } from '@/schemas/new-user'
+import { createProfileSchema, type ProfileFormValues } from '@/schemas/profile'
 import { resolveProfilePerson, updatePerson } from '@/services/persons'
 
 type ProfilePageProps = {
@@ -25,7 +25,7 @@ type ProfilePageProps = {
 
 export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
   const { t } = useTranslation()
-  const profileSchema = useMemo(() => createNewUserSchema(t), [t])
+  const profileSchema = useMemo(() => createProfileSchema(t), [t])
   const [personId, setPersonId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -35,7 +35,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
     reset,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<NewUserFormValues>({
+  } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       firstName: '',
@@ -93,7 +93,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
     }
   }, [username, reset, t])
 
-  async function onSubmit(values: NewUserFormValues) {
+  async function onSubmit(values: ProfileFormValues) {
     if (!personId) {
       setError('root', { message: t('profile.notFound') })
       return
