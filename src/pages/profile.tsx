@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftIcon } from 'lucide-react'
 import { useForm } from 'react-hook-form'
@@ -14,25 +14,29 @@ import {
   FieldSet,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { createNewUserSchema, type NewUserFormValues } from '@/schemas/new-user'
-import { createPerson } from '@/services/persons'
 import { savePersonIdForUser } from '@/lib/person-id'
+import { createNewUserSchema, type NewUserFormValues } from '@/schemas/new-user'
+import { resolveProfilePerson, updatePerson } from '@/services/persons'
 
-type NewUserPageProps = {
-  onBackToLogin: () => void
-  onCreated: () => void
+type ProfilePageProps = {
+  username: string
+  onHome: () => void
 }
 
-export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPageProps>) {
+export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
   const { t } = useTranslation()
-  const newUserSchema = useMemo(() => createNewUserSchema(t), [t])
+  const profileSchema = useMemo(() => createNewUserSchema(t), [t])
+  const [personId, setPersonId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const {
     register,
     handleSubmit,
+    reset,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<NewUserFormValues>({
-    resolver: zodResolver(newUserSchema),
+    resolver: zodResolver(profileSchema),
     defaultValues: {
       firstName: '',
       lastName: '',
@@ -44,9 +48,60 @@ export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPagePr
     },
   })
 
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadProfile() {
+      setIsLoading(true)
+      setLoadError(null)
+
+      try {
+        const person = await resolveProfilePerson(username)
+        if (cancelled) {
+          return
+        }
+
+        setPersonId(person.id)
+        savePersonIdForUser(username, person.id)
+        reset({
+          firstName: person.firstName,
+          lastName: person.lastName,
+          address: person.address,
+          gender: person.gender,
+          enabled: person.enabled,
+          profileUrl: person.profileUrl,
+          photoUrl: person.photoUrl,
+        })
+      } catch (error_) {
+        if (!cancelled) {
+          setPersonId(null)
+          setLoadError(
+            error_ instanceof Error ? error_.message : t('profile.unableToLoad'),
+          )
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    void loadProfile()
+
+    return () => {
+      cancelled = true
+    }
+  }, [username, reset, t])
+
   async function onSubmit(values: NewUserFormValues) {
+    if (!personId) {
+      setError('root', { message: t('profile.notFound') })
+      return
+    }
+
     try {
-      const person = await createPerson({
+      const person = await updatePerson({
+        id: personId,
         firstName: values.firstName.trim(),
         lastName: values.lastName.trim(),
         address: values.address.trim(),
@@ -55,15 +110,18 @@ export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPagePr
         profileUrl: values.profileUrl.trim(),
         photoUrl: values.photoUrl.trim(),
       })
-      savePersonIdForUser(person.firstName, person.id)
-      onCreated()
+      setPersonId(person.id)
+      savePersonIdForUser(username, person.id)
+      onHome()
     } catch (error_) {
       setError('root', {
         message:
-          error_ instanceof Error ? error_.message : t('newUser.unableToCreate'),
+          error_ instanceof Error ? error_.message : t('profile.unableToSave'),
       })
     }
   }
+
+  const isBusy = isLoading || isSubmitting
 
   return (
     <main className="relative min-h-svh bg-background">
@@ -76,12 +134,12 @@ export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPagePr
 
           <div className="flex max-w-sm flex-col gap-3">
             <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight text-foreground">
-              {t('newUser.title')}
+              {t('profile.title')}
             </h1>
             <p className="text-muted-foreground">
-              {t('newUser.descriptionLine1')}
+              {t('profile.descriptionLine1')}
               <br />
-              {t('newUser.descriptionLine2')}
+              {t('profile.descriptionLine2')}
             </p>
           </div>
 
@@ -89,10 +147,10 @@ export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPagePr
             type="button"
             variant="link"
             className="h-auto px-0 text-primary"
-            onClick={onBackToLogin}
+            onClick={onHome}
           >
             <ArrowLeftIcon className="size-4" />
-            {t('newUser.backToLogin')}
+            {t('profile.home')}
           </Button>
         </section>
 
@@ -104,6 +162,10 @@ export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPagePr
           >
             <FieldSet className="min-w-0 gap-3 border-0 p-0">
               <FieldGroup className="gap-3">
+                {isLoading ? (
+                  <p className="text-sm text-muted-foreground">{t('profile.loading')}</p>
+                ) : null}
+                {loadError ? <FieldError>{loadError}</FieldError> : null}
                 {errors.root ? <FieldError>{errors.root.message}</FieldError> : null}
 
                 <Field data-invalid={Boolean(errors.firstName) || undefined}>
@@ -115,7 +177,7 @@ export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPagePr
                     type="text"
                     placeholder={t('newUser.fieldFirstName')}
                     autoComplete="given-name"
-                    disabled={isSubmitting}
+                    disabled={isBusy || Boolean(loadError)}
                     aria-invalid={Boolean(errors.firstName)}
                     className="h-11 bg-card px-3"
                     {...register('firstName')}
@@ -132,7 +194,7 @@ export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPagePr
                     type="text"
                     placeholder={t('newUser.fieldLastName')}
                     autoComplete="family-name"
-                    disabled={isSubmitting}
+                    disabled={isBusy || Boolean(loadError)}
                     aria-invalid={Boolean(errors.lastName)}
                     className="h-11 bg-card px-3"
                     {...register('lastName')}
@@ -149,7 +211,7 @@ export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPagePr
                     type="text"
                     placeholder={t('newUser.fieldAddress')}
                     autoComplete="street-address"
-                    disabled={isSubmitting}
+                    disabled={isBusy || Boolean(loadError)}
                     aria-invalid={Boolean(errors.address)}
                     className="h-11 bg-card px-3"
                     {...register('address')}
@@ -165,7 +227,7 @@ export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPagePr
                     id="gender"
                     type="text"
                     placeholder={t('newUser.fieldGender')}
-                    disabled={isSubmitting}
+                    disabled={isBusy || Boolean(loadError)}
                     aria-invalid={Boolean(errors.gender)}
                     className="h-11 bg-card px-3"
                     {...register('gender')}
@@ -181,7 +243,7 @@ export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPagePr
                     id="profileUrl"
                     type="text"
                     placeholder={t('newUser.fieldProfileUrl')}
-                    disabled={isSubmitting}
+                    disabled={isBusy || Boolean(loadError)}
                     aria-invalid={Boolean(errors.profileUrl)}
                     className="h-11 bg-card px-3"
                     {...register('profileUrl')}
@@ -197,7 +259,7 @@ export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPagePr
                     id="photoUrl"
                     type="text"
                     placeholder={t('newUser.fieldPhotoUrl')}
-                    disabled={isSubmitting}
+                    disabled={isBusy || Boolean(loadError)}
                     aria-invalid={Boolean(errors.photoUrl)}
                     className="h-11 bg-card px-3"
                     {...register('photoUrl')}
@@ -209,7 +271,7 @@ export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPagePr
                   <input
                     id="enabled"
                     type="checkbox"
-                    disabled={isSubmitting}
+                    disabled={isBusy || Boolean(loadError)}
                     className="size-4 rounded border border-input accent-primary"
                     {...register('enabled')}
                   />
@@ -224,9 +286,9 @@ export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPagePr
               type="submit"
               size="lg"
               className="mt-1 h-11 w-full text-base"
-              disabled={isSubmitting}
+              disabled={isBusy || Boolean(loadError)}
             >
-              {isSubmitting ? t('newUser.creating') : t('newUser.create')}
+              {isSubmitting ? t('profile.saving') : t('profile.save')}
             </Button>
           </form>
         </section>

@@ -11,12 +11,13 @@ import { BooksPage } from '@/pages/books'
 import { EditBookPage } from '@/pages/edit-book'
 import { LoginPage } from '@/pages/login'
 import { NewUserPage } from '@/pages/new-user'
+import { ProfilePage } from '@/pages/profile'
 import { deleteBook, listBooks } from '@/services/books'
 import type { AuthSession } from '@/types/auth'
 import type { Book } from '@/types/book'
 
 type AuthScreen = 'login' | 'new-user'
-type Screen = 'books' | 'add-book' | 'edit-book'
+type Screen = 'books' | 'add-book' | 'edit-book' | 'profile'
 
 function App() {
   const [session, setSession] = useState<AuthSession | null>(() => loadSession())
@@ -122,6 +123,10 @@ function App() {
     setScreen('add-book')
   }
 
+  function handleProfile() {
+    setScreen('profile')
+  }
+
   function handleEdit(id: string) {
     setEditingId(id)
     setScreen('edit-book')
@@ -176,6 +181,10 @@ function App() {
     )
   }
 
+  if (screen === 'profile') {
+    return <ProfilePage username={session.username} onHome={handleHome} />
+  }
+
   return (
     <BooksPage
       username={session.username}
@@ -184,6 +193,7 @@ function App() {
       error={booksError}
       deletingId={deletingId}
       onAddNewBook={handleAddNewBook}
+      onProfile={handleProfile}
       onEdit={handleEdit}
       onDelete={handleDelete}
       onLogout={handleLogout}

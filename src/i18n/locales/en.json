@@ -44,6 +44,20 @@
     "couldNotReachServer": "Could not reach the server. Please try again.",
     "unauthorized": "You are not authorized to create a user. Please sign in again."
   },
+  "profile": {
+    "title": "Profile",
+    "descriptionLine1": "Update your personal information and click on",
+    "descriptionLine2": "'Save'!",
+    "home": "Home",
+    "save": "Save",
+    "saving": "Saving...",
+    "loading": "Loading profile...",
+    "unableToLoad": "Unable to load the profile. Please try again.",
+    "unableToSave": "Unable to save the profile. Please try again.",
+    "couldNotReachServer": "Could not reach the server. Please try again.",
+    "unauthorized": "You are not authorized to edit this profile. Please sign in again.",
+    "notFound": "No profile was found for this user."
+  },
   "books": {
     "welcome": "Welcome, <name>{{username}}</name>!",
     "addNewBook": "Add New Book",
