@@ -3,13 +3,9 @@ import type { TFunction } from 'i18next'
 
 export function createNewUserSchema(t: TFunction) {
   return z.object({
-    firstName: z.string().trim().min(1, t('newUser.firstNameRequired')),
-    lastName: z.string().trim().min(1, t('newUser.lastNameRequired')),
-    address: z.string().trim().min(1, t('newUser.addressRequired')),
-    gender: z.string().trim().min(1, t('newUser.genderRequired')),
-    enabled: z.boolean(),
-    profileUrl: z.string().trim(),
-    photoUrl: z.string().trim(),
+    username: z.string().trim().min(1, t('newUser.usernameRequired')),
+    password: z.string().min(1, t('newUser.passwordRequired')),
+    fullname: z.string().trim().min(1, t('newUser.fullnameRequired')),
   })
 }
 

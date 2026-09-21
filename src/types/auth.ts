@@ -3,6 +3,12 @@ export type SignInRequest = {
   password: string
 }
 
+export type CreateUserRequest = {
+  username: string
+  password: string
+  fullname: string
+}
+
 export type SignInResponse = {
   username: string
   authenticated: boolean
