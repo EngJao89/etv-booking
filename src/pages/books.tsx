@@ -15,6 +15,7 @@ type BooksPageProps = {
   deletingId: string | null
   onAddNewBook: () => void
   onProfile: () => void
+  onOpen: (id: string) => void
   onEdit: (id: string) => void
   onDelete: (id: string) => void
   onLogout: () => void
@@ -28,6 +29,7 @@ export function BooksPage({
   deletingId,
   onAddNewBook,
   onProfile,
+  onOpen,
   onEdit,
   onDelete,
   onLogout,
@@ -113,6 +115,7 @@ export function BooksPage({
                   key={book.id}
                   book={book}
                   isDeleting={deletingId === book.id}
+                  onOpen={onOpen}
                   onEdit={onEdit}
                   onDelete={onDelete}
                 />
