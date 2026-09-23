@@ -21,11 +21,18 @@ function BookField({ label, value }: Readonly<{ label: string; value: string }>)
 type BookCardProps = {
   book: Book
   isDeleting: boolean
+  onOpen: (id: string) => void
   onEdit: (id: string) => void
   onDelete: (id: string) => void
 }
 
-export function BookCard({ book, isDeleting, onEdit, onDelete }: Readonly<BookCardProps>) {
+export function BookCard({
+  book,
+  isDeleting,
+  onOpen,
+  onEdit,
+  onDelete,
+}: Readonly<BookCardProps>) {
   const { t, i18n } = useTranslation()
   const priceFormatter = new Intl.NumberFormat(i18n.language, {
     style: 'currency',
@@ -40,7 +47,19 @@ export function BookCard({ book, isDeleting, onEdit, onDelete }: Readonly<BookCa
   })
 
   return (
-    <Card className="shadow-sm">
+    <Card
+      role="button"
+      tabIndex={0}
+      className="cursor-pointer shadow-sm transition-shadow hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/50"
+      aria-label={t('books.viewDetails', { title: book.title })}
+      onClick={() => onOpen(book.id)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onOpen(book.id)
+        }
+      }}
+    >
       <CardHeader>
         <BookField label={t('books.title')} value={book.title} />
         <CardAction className="flex flex-col gap-0.5">
@@ -49,7 +68,10 @@ export function BookCard({ book, isDeleting, onEdit, onDelete }: Readonly<BookCa
             variant="ghost"
             size="icon-xs"
             aria-label={t('books.edit', { title: book.title })}
-            onClick={() => onEdit(book.id)}
+            onClick={(event) => {
+              event.stopPropagation()
+              onEdit(book.id)
+            }}
           >
             <SquarePenIcon className="size-4 text-primary" />
           </Button>
@@ -63,7 +85,10 @@ export function BookCard({ book, isDeleting, onEdit, onDelete }: Readonly<BookCa
                 : t('books.delete', { title: book.title })
             }
             disabled={isDeleting}
-            onClick={() => onDelete(book.id)}
+            onClick={(event) => {
+              event.stopPropagation()
+              onDelete(book.id)
+            }}
           >
             <Trash2Icon className="size-4 text-primary" />
           </Button>

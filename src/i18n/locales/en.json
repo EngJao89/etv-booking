@@ -82,7 +82,16 @@
     "edit": "Edit {{title}}",
     "delete": "Delete {{title}}",
     "deleting": "Deleting {{title}}",
-    "unableToDelete": "Unable to delete the book. Please try again."
+    "unableToDelete": "Unable to delete the book. Please try again.",
+    "viewDetails": "View details of {{title}}"
+  },
+  "bookDetails": {
+    "title": "Book Details",
+    "description": "Review the book information returned by the API.",
+    "home": "Home",
+    "edit": "Edit Book",
+    "loading": "Loading book...",
+    "unableToLoad": "Unable to load the book. Please try again."
   },
   "editBook": {
     "title": "Edit Book",

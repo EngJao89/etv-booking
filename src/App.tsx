@@ -7,6 +7,7 @@ import {
   saveSession,
 } from '@/lib/session'
 import { AddBookPage } from '@/pages/add-book'
+import { BookDetailsPage } from '@/pages/book-details'
 import { BooksPage } from '@/pages/books'
 import { EditBookPage } from '@/pages/edit-book'
 import { LoginPage } from '@/pages/login'
@@ -17,7 +18,7 @@ import type { AuthSession } from '@/types/auth'
 import type { Book } from '@/types/book'
 
 type AuthScreen = 'login' | 'new-user'
-type Screen = 'books' | 'add-book' | 'edit-book' | 'profile'
+type Screen = 'books' | 'add-book' | 'edit-book' | 'book-details' | 'profile'
 
 function App() {
   const [session, setSession] = useState<AuthSession | null>(() => loadSession())
@@ -28,6 +29,7 @@ function App() {
   const [booksError, setBooksError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [detailsId, setDetailsId] = useState<string | null>(null)
 
   useEffect(() => {
     function onSessionExpired() {
@@ -39,6 +41,7 @@ function App() {
       setBooksError(null)
       setDeletingId(null)
       setEditingId(null)
+      setDetailsId(null)
     }
 
     window.addEventListener(SESSION_EXPIRED_EVENT, onSessionExpired)
@@ -100,6 +103,7 @@ function App() {
     setBooksError(null)
     setDeletingId(null)
     setEditingId(null)
+    setDetailsId(null)
   }
 
   function handleNewUser() {
@@ -116,6 +120,7 @@ function App() {
 
   function handleHome() {
     setEditingId(null)
+    setDetailsId(null)
     setScreen('books')
   }
 
@@ -127,8 +132,14 @@ function App() {
     setScreen('profile')
   }
 
+  function handleOpen(id: string) {
+    setDetailsId(id)
+    setScreen('book-details')
+  }
+
   function handleEdit(id: string) {
     setEditingId(id)
+    setDetailsId(null)
     setScreen('edit-book')
   }
 
@@ -181,6 +192,16 @@ function App() {
     )
   }
 
+  if (screen === 'book-details' && detailsId) {
+    return (
+      <BookDetailsPage
+        bookId={detailsId}
+        onHome={handleHome}
+        onEdit={handleEdit}
+      />
+    )
+  }
+
   if (screen === 'profile') {
     return <ProfilePage username={session.username} onHome={handleHome} />
   }
@@ -194,6 +215,7 @@ function App() {
       deletingId={deletingId}
       onAddNewBook={handleAddNewBook}
       onProfile={handleProfile}
+      onOpen={handleOpen}
       onEdit={handleEdit}
       onDelete={handleDelete}
       onLogout={handleLogout}
