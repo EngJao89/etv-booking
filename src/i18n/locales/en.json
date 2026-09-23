@@ -9,6 +9,11 @@
     "dark": "Dark",
     "system": "System"
   },
+  "language": {
+    "change": "Change language",
+    "en": "English",
+    "pt": "Português"
+  },
   "signIn": {
     "title": "Access your Account",
     "username": "Username",
