@@ -3,12 +3,14 @@ import { Trans, useTranslation } from 'react-i18next'
 import logo from '@/assets/logo.svg'
 import { BookCard } from '@/components/book-card'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { UserAvatar } from '@/components/user-avatar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { Book } from '@/types/book'
 
 type BooksPageProps = {
   username: string
+  photoUrl: string | null
   books: Book[]
   isLoading: boolean
   error: string | null
@@ -23,6 +25,7 @@ type BooksPageProps = {
 
 export function BooksPage({
   username,
+  photoUrl,
   books,
   isLoading,
   error,
@@ -42,21 +45,31 @@ export function BooksPage({
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <img src={logo} alt={t('app.logoAlt')} className="size-12 rounded-md" />
-            <p className="text-sm text-foreground sm:text-base">
-              <Trans
-                i18nKey="books.welcome"
-                values={{ username }}
-                components={{
-                  name: (
-                    <button
-                      type="button"
-                      className="cursor-pointer italic text-primary underline-offset-4 hover:underline"
-                      onClick={onProfile}
-                    />
-                  ),
-                }}
-              />
-            </p>
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                className="shrink-0 cursor-pointer rounded-full focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                aria-label={t('profile.title')}
+                onClick={onProfile}
+              >
+                <UserAvatar photoUrl={photoUrl} name={username} size="lg" />
+              </button>
+              <p className="text-sm text-foreground sm:text-base">
+                <Trans
+                  i18nKey="books.welcome"
+                  values={{ username }}
+                  components={{
+                    name: (
+                      <button
+                        type="button"
+                        className="cursor-pointer italic text-primary underline-offset-4 hover:underline"
+                        onClick={onProfile}
+                      />
+                    ),
+                  }}
+                />
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
