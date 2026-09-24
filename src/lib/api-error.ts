@@ -13,7 +13,7 @@ export function getApiErrorMessage(data: unknown) {
     if (!trimmed || isHtml(trimmed)) {
       return undefined
     }
-    return trimmed
+    return simplifyApiMessage(trimmed)
   }
 
   if (!data || typeof data !== 'object') {
@@ -21,14 +21,22 @@ export function getApiErrorMessage(data: unknown) {
   }
 
   if ('message' in data && typeof data.message === 'string' && data.message.trim()) {
-    return isHtml(data.message) ? undefined : data.message
+    return isHtml(data.message) ? undefined : simplifyApiMessage(data.message)
   }
 
   if ('detail' in data && typeof data.detail === 'string' && data.detail.trim()) {
-    return isHtml(data.detail) ? undefined : data.detail
+    return isHtml(data.detail) ? undefined : simplifyApiMessage(data.detail)
   }
 
   return undefined
+}
+
+function simplifyApiMessage(message: string) {
+  if (/Data too long for column ['"]?gender['"]?/i.test(message)) {
+    return 'gender_too_long'
+  }
+
+  return message
 }
 
 export function isHtmlErrorBody(data: unknown) {

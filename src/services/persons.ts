@@ -45,7 +45,12 @@ function getCreatePersonErrorMessage(error: unknown) {
     return i18n.t('profile.unauthorized')
   }
 
-  return getApiErrorMessage(data) ?? i18n.t('profile.unableToCreate')
+  const apiMessage = getApiErrorMessage(data)
+  if (apiMessage === 'gender_too_long') {
+    return i18n.t('newUser.genderInvalid')
+  }
+
+  return apiMessage ?? i18n.t('profile.unableToCreate')
 }
 
 function getPersonErrorMessage(
@@ -70,7 +75,12 @@ function getPersonErrorMessage(
     return i18n.t('profile.notFound')
   }
 
-  return getApiErrorMessage(data) ?? i18n.t(fallbackKey)
+  const apiMessage = getApiErrorMessage(data)
+  if (apiMessage === 'gender_too_long') {
+    return i18n.t('newUser.genderInvalid')
+  }
+
+  return apiMessage ?? i18n.t(fallbackKey)
 }
 
 function isPersonApiResponse(value: unknown): value is PersonApiResponse {
