@@ -12,6 +12,13 @@ export type UpdatePersonPayload = CreatePersonPayload & {
   id: string
 }
 
+export class PersonNotFoundError extends Error {
+  constructor(message = i18n.t('profile.notFound')) {
+    super(message)
+    this.name = 'PersonNotFoundError'
+  }
+}
+
 type PersonApiResponse = {
   id: number
   firstName: string
@@ -25,20 +32,20 @@ type PersonApiResponse = {
 
 function getCreatePersonErrorMessage(error: unknown) {
   if (!isAxiosError(error)) {
-    return i18n.t('newUser.unableToCreate')
+    return i18n.t('profile.unableToCreate')
   }
 
   if (!error.response) {
-    return i18n.t('newUser.couldNotReachServer')
+    return i18n.t('profile.couldNotReachServer')
   }
 
   const { status, data } = error.response
 
   if (status === 401 || status === 403) {
-    return i18n.t('newUser.unauthorized')
+    return i18n.t('profile.unauthorized')
   }
 
-  return getApiErrorMessage(data) ?? i18n.t('newUser.unableToCreate')
+  return getApiErrorMessage(data) ?? i18n.t('profile.unableToCreate')
 }
 
 function getPersonErrorMessage(
@@ -185,14 +192,22 @@ export async function resolveProfilePerson(username: string): Promise<Person> {
       ) ?? people[0]
 
     if (!person) {
-      throw new Error(i18n.t('profile.notFound'))
+      throw new PersonNotFoundError()
     }
 
     savePersonIdForUser(username, person.id)
     return person
   } catch (error) {
+    if (error instanceof PersonNotFoundError) {
+      throw error
+    }
+
     if (error instanceof Error && !isAxiosError(error)) {
       throw error
+    }
+
+    if (isAxiosError(error) && error.response?.status === 404) {
+      throw new PersonNotFoundError()
     }
 
     throw new Error(getPersonErrorMessage(error, 'profile.unableToLoad'))

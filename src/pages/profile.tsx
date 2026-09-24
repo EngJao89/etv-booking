@@ -17,17 +17,25 @@ import {
 import { Input } from '@/components/ui/input'
 import { savePersonIdForUser } from '@/lib/person-id'
 import { createProfileSchema, type ProfileFormValues } from '@/schemas/profile'
-import { resolveProfilePerson, updatePerson } from '@/services/persons'
+import {
+  PersonNotFoundError,
+  createPerson,
+  resolveProfilePerson,
+  updatePerson,
+} from '@/services/persons'
 
 type ProfilePageProps = {
   username: string
   onHome: () => void
 }
 
+type ProfileMode = 'edit' | 'create'
+
 export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
   const { t } = useTranslation()
   const profileSchema = useMemo(() => createProfileSchema(t), [t])
   const [personId, setPersonId] = useState<string | null>(null)
+  const [mode, setMode] = useState<ProfileMode>('edit')
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const {
@@ -55,6 +63,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
     async function loadProfile() {
       setIsLoading(true)
       setLoadError(null)
+      setMode('edit')
 
       try {
         const person = await resolveProfilePerson(username)
@@ -63,6 +72,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
         }
 
         setPersonId(person.id)
+        setMode('edit')
         savePersonIdForUser(username, person.id)
         reset({
           firstName: person.firstName,
@@ -74,12 +84,31 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
           photoUrl: person.photoUrl,
         })
       } catch (error_) {
-        if (!cancelled) {
-          setPersonId(null)
-          setLoadError(
-            error_ instanceof Error ? error_.message : t('profile.unableToLoad'),
-          )
+        if (cancelled) {
+          return
         }
+
+        setPersonId(null)
+
+        if (error_ instanceof PersonNotFoundError) {
+          setMode('create')
+          setLoadError(null)
+          reset({
+            firstName: '',
+            lastName: '',
+            address: '',
+            gender: '',
+            enabled: true,
+            profileUrl: '',
+            photoUrl: '',
+          })
+          return
+        }
+
+        setMode('edit')
+        setLoadError(
+          error_ instanceof Error ? error_.message : t('profile.unableToLoad'),
+        )
       } finally {
         if (!cancelled) {
           setIsLoading(false)
@@ -95,34 +124,63 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
   }, [username, reset, t])
 
   async function onSubmit(values: ProfileFormValues) {
-    if (!personId) {
-      setError('root', { message: t('profile.notFound') })
-      return
+    const payload = {
+      firstName: values.firstName.trim(),
+      lastName: values.lastName.trim(),
+      address: values.address.trim(),
+      gender: values.gender.trim(),
+      enabled: values.enabled,
+      profileUrl: values.profileUrl.trim(),
+      photoUrl: values.photoUrl.trim(),
     }
 
     try {
+      if (mode === 'create' || !personId) {
+        const person = await createPerson(payload)
+        setPersonId(person.id)
+        setMode('edit')
+        savePersonIdForUser(username, person.id)
+        onHome()
+        return
+      }
+
       const person = await updatePerson({
         id: personId,
-        firstName: values.firstName.trim(),
-        lastName: values.lastName.trim(),
-        address: values.address.trim(),
-        gender: values.gender.trim(),
-        enabled: values.enabled,
-        profileUrl: values.profileUrl.trim(),
-        photoUrl: values.photoUrl.trim(),
+        ...payload,
       })
       setPersonId(person.id)
       savePersonIdForUser(username, person.id)
       onHome()
     } catch (error_) {
+      let fallbackMessage = t('profile.unableToSave')
+      if (mode === 'create') {
+        fallbackMessage = t('profile.unableToCreate')
+      }
+
       setError('root', {
-        message:
-          error_ instanceof Error ? error_.message : t('profile.unableToSave'),
+        message: error_ instanceof Error ? error_.message : fallbackMessage,
       })
     }
   }
 
   const isBusy = isLoading || isSubmitting
+  const isFormLocked = isBusy || Boolean(loadError)
+  const isCreateMode = mode === 'create'
+
+  function getSubmitLabel() {
+    if (isCreateMode) {
+      return isSubmitting ? t('profile.creating') : t('profile.create')
+    }
+
+    return isSubmitting ? t('profile.saving') : t('profile.save')
+  }
+
+  const descriptionLine1 = isCreateMode
+    ? t('profile.createDescriptionLine1')
+    : t('profile.descriptionLine1')
+  const descriptionLine2 = isCreateMode
+    ? t('profile.createDescriptionLine2')
+    : t('profile.descriptionLine2')
 
   return (
     <main className="relative min-h-svh bg-background">
@@ -139,9 +197,9 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
               {t('profile.title')}
             </h1>
             <p className="text-muted-foreground">
-              {t('profile.descriptionLine1')}
+              {descriptionLine1}
               <br />
-              {t('profile.descriptionLine2')}
+              {descriptionLine2}
             </p>
           </div>
 
@@ -167,6 +225,9 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
                 {isLoading ? (
                   <p className="text-sm text-muted-foreground">{t('profile.loading')}</p>
                 ) : null}
+                {isCreateMode && !isLoading ? (
+                  <p className="text-sm text-muted-foreground">{t('profile.notFound')}</p>
+                ) : null}
                 {loadError ? <FieldError>{loadError}</FieldError> : null}
                 {errors.root ? <FieldError>{errors.root.message}</FieldError> : null}
 
@@ -179,7 +240,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
                     type="text"
                     placeholder={t('newUser.fieldFirstName')}
                     autoComplete="given-name"
-                    disabled={isBusy || Boolean(loadError)}
+                    disabled={isFormLocked}
                     aria-invalid={Boolean(errors.firstName)}
                     className="h-11 bg-card px-3"
                     {...register('firstName')}
@@ -196,7 +257,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
                     type="text"
                     placeholder={t('newUser.fieldLastName')}
                     autoComplete="family-name"
-                    disabled={isBusy || Boolean(loadError)}
+                    disabled={isFormLocked}
                     aria-invalid={Boolean(errors.lastName)}
                     className="h-11 bg-card px-3"
                     {...register('lastName')}
@@ -213,7 +274,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
                     type="text"
                     placeholder={t('newUser.fieldAddress')}
                     autoComplete="street-address"
-                    disabled={isBusy || Boolean(loadError)}
+                    disabled={isFormLocked}
                     aria-invalid={Boolean(errors.address)}
                     className="h-11 bg-card px-3"
                     {...register('address')}
@@ -229,7 +290,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
                     id="gender"
                     type="text"
                     placeholder={t('newUser.fieldGender')}
-                    disabled={isBusy || Boolean(loadError)}
+                    disabled={isFormLocked}
                     aria-invalid={Boolean(errors.gender)}
                     className="h-11 bg-card px-3"
                     {...register('gender')}
@@ -245,7 +306,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
                     id="profileUrl"
                     type="text"
                     placeholder={t('newUser.fieldProfileUrl')}
-                    disabled={isBusy || Boolean(loadError)}
+                    disabled={isFormLocked}
                     aria-invalid={Boolean(errors.profileUrl)}
                     className="h-11 bg-card px-3"
                     {...register('profileUrl')}
@@ -261,7 +322,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
                     id="photoUrl"
                     type="text"
                     placeholder={t('newUser.fieldPhotoUrl')}
-                    disabled={isBusy || Boolean(loadError)}
+                    disabled={isFormLocked}
                     aria-invalid={Boolean(errors.photoUrl)}
                     className="h-11 bg-card px-3"
                     {...register('photoUrl')}
@@ -273,7 +334,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
                   <input
                     id="enabled"
                     type="checkbox"
-                    disabled={isBusy || Boolean(loadError)}
+                    disabled={isFormLocked}
                     className="size-4 rounded border border-input accent-primary"
                     {...register('enabled')}
                   />
@@ -288,9 +349,9 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
               type="submit"
               size="lg"
               className="mt-1 h-11 w-full text-base"
-              disabled={isBusy || Boolean(loadError)}
+              disabled={isFormLocked}
             >
-              {isSubmitting ? t('profile.saving') : t('profile.save')}
+              {getSubmitLabel()}
             </Button>
           </form>
         </section>

@@ -66,9 +66,14 @@
     "loading": "Loading profile...",
     "unableToLoad": "Unable to load the profile. Please try again.",
     "unableToSave": "Unable to save the profile. Please try again.",
+    "unableToCreate": "Unable to create the profile. Please try again.",
     "couldNotReachServer": "Could not reach the server. Please try again.",
     "unauthorized": "You are not authorized to edit this profile. Please sign in again.",
-    "notFound": "No profile was found for this user."
+    "notFound": "No profile was found for this user. Fill in the form to create one.",
+    "createDescriptionLine1": "No profile found yet. Enter your information and click on",
+    "createDescriptionLine2": "'Create'!",
+    "create": "Create",
+    "creating": "Creating..."
   },
   "books": {
     "welcome": "Welcome, <name>{{username}}</name>!",

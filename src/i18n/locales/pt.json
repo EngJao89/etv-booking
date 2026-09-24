@@ -66,9 +66,14 @@
     "loading": "Carregando perfil...",
     "unableToLoad": "Não foi possível carregar o perfil. Tente novamente.",
     "unableToSave": "Não foi possível salvar o perfil. Tente novamente.",
+    "unableToCreate": "Não foi possível criar o perfil. Tente novamente.",
     "couldNotReachServer": "Não foi possível conectar ao servidor. Tente novamente.",
     "unauthorized": "Você não tem permissão para editar este perfil. Entre novamente.",
-    "notFound": "Nenhum perfil foi encontrado para este usuário."
+    "notFound": "Nenhum perfil foi encontrado para este usuário. Preencha o formulário para criar um.",
+    "createDescriptionLine1": "Ainda não há perfil. Informe seus dados e clique em",
+    "createDescriptionLine2": "'Criar'!",
+    "create": "Criar",
+    "creating": "Criando..."
   },
   "books": {
     "welcome": "Bem-vindo, <name>{{username}}</name>!",
