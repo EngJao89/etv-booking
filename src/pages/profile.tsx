@@ -16,7 +16,11 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { savePersonIdForUser } from '@/lib/person-id'
-import { createProfileSchema, type ProfileFormValues } from '@/schemas/profile'
+import {
+  createProfileSchema,
+  normalizePersonGender,
+  type ProfileFormValues,
+} from '@/schemas/profile'
 import {
   PersonNotFoundError,
   createPerson,
@@ -50,7 +54,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
       firstName: '',
       lastName: '',
       address: '',
-      gender: '',
+      gender: undefined,
       enabled: true,
       profileUrl: '',
       photoUrl: '',
@@ -78,7 +82,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
           firstName: person.firstName,
           lastName: person.lastName,
           address: person.address,
-          gender: person.gender,
+          gender: normalizePersonGender(person.gender) || undefined,
           enabled: person.enabled,
           profileUrl: person.profileUrl,
           photoUrl: person.photoUrl,
@@ -97,7 +101,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
             firstName: '',
             lastName: '',
             address: '',
-            gender: '',
+            gender: undefined,
             enabled: true,
             profileUrl: '',
             photoUrl: '',
@@ -128,7 +132,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
       firstName: values.firstName.trim(),
       lastName: values.lastName.trim(),
       address: values.address.trim(),
-      gender: values.gender.trim(),
+      gender: values.gender,
       enabled: values.enabled,
       profileUrl: values.profileUrl.trim(),
       photoUrl: values.photoUrl.trim(),
@@ -286,15 +290,17 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
                   <FieldLabel htmlFor="gender" className="sr-only">
                     {t('newUser.fieldGender')}
                   </FieldLabel>
-                  <Input
+                  <select
                     id="gender"
-                    type="text"
-                    placeholder={t('newUser.fieldGender')}
                     disabled={isFormLocked}
                     aria-invalid={Boolean(errors.gender)}
-                    className="h-11 bg-card px-3"
+                    className="h-11 w-full rounded-md border border-input bg-card px-3 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30"
                     {...register('gender')}
-                  />
+                  >
+                    <option value="">{t('newUser.fieldGender')}</option>
+                    <option value="Male">{t('newUser.genderMale')}</option>
+                    <option value="Female">{t('newUser.genderFemale')}</option>
+                  </select>
                   <FieldError errors={[errors.gender]} />
                 </Field>
 
