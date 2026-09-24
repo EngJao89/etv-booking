@@ -1,12 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeftIcon } from 'lucide-react'
-import { useForm } from 'react-hook-form'
+import { ArrowLeftIcon, ChevronDownIcon } from 'lucide-react'
+import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import logo from '@/assets/logo.svg'
 import { LanguageToggle } from '@/components/language-toggle'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {
   Field,
   FieldError,
@@ -15,10 +22,13 @@ import {
   FieldSet,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { cn } from 'cn'
 import { savePersonIdForUser } from '@/lib/person-id'
 import {
+  PERSON_GENDERS,
   createProfileSchema,
   normalizePersonGender,
+  type PersonGender,
   type ProfileFormValues,
 } from '@/schemas/profile'
 import {
@@ -44,6 +54,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
   const [loadError, setLoadError] = useState<string | null>(null)
   const {
     register,
+    control,
     handleSubmit,
     reset,
     setError,
@@ -290,17 +301,68 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
                   <FieldLabel htmlFor="gender" className="sr-only">
                     {t('newUser.fieldGender')}
                   </FieldLabel>
-                  <select
-                    id="gender"
-                    disabled={isFormLocked}
-                    aria-invalid={Boolean(errors.gender)}
-                    className="h-11 w-full rounded-md border border-input bg-card px-3 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30"
-                    {...register('gender')}
-                  >
-                    <option value="">{t('newUser.fieldGender')}</option>
-                    <option value="Male">{t('newUser.genderMale')}</option>
-                    <option value="Female">{t('newUser.genderFemale')}</option>
-                  </select>
+                  <Controller
+                    name="gender"
+                    control={control}
+                    render={({ field }) => {
+                      function genderLabel(value: ProfileFormValues['gender'] | undefined) {
+                        if (value === 'Male') {
+                          return t('newUser.genderMale')
+                        }
+                        if (value === 'Female') {
+                          return t('newUser.genderFemale')
+                        }
+                        return null
+                      }
+
+                      const selectedLabel = genderLabel(field.value)
+
+                      return (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            disabled={isFormLocked}
+                            render={
+                              <Button
+                                id="gender"
+                                type="button"
+                                variant="outline"
+                                aria-invalid={Boolean(errors.gender)}
+                                className={cn(
+                                  'h-11 w-full justify-between bg-card px-3 font-normal shadow-xs dark:bg-input/30',
+                                  !selectedLabel && 'text-muted-foreground',
+                                )}
+                              />
+                            }
+                          >
+                            <span>{selectedLabel ?? t('newUser.fieldGender')}</span>
+                            <ChevronDownIcon className="size-4 opacity-60" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="start"
+                            className="w-(--anchor-width)"
+                          >
+                            <DropdownMenuRadioGroup
+                              value={field.value ?? ''}
+                              onValueChange={(value) => {
+                                if (
+                                  PERSON_GENDERS.includes(value as PersonGender)
+                                ) {
+                                  field.onChange(value as PersonGender)
+                                }
+                              }}
+                            >
+                              <DropdownMenuRadioItem value="Male">
+                                {t('newUser.genderMale')}
+                              </DropdownMenuRadioItem>
+                              <DropdownMenuRadioItem value="Female">
+                                {t('newUser.genderFemale')}
+                              </DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )
+                    }}
+                  />
                   <FieldError errors={[errors.gender]} />
                 </Field>
 
