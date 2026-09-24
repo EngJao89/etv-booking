@@ -3,9 +3,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeftIcon, ChevronDownIcon } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import logo from '@/assets/logo.svg'
 import { LanguageToggle } from '@/components/language-toggle'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { UserAvatar } from '@/components/user-avatar'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -24,6 +24,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { cn } from 'cn'
 import { savePersonIdForUser } from '@/lib/person-id'
+import { savePhotoUrlForUser } from '@/lib/photo-url'
 import {
   PERSON_GENDERS,
   createProfileSchema,
@@ -41,11 +42,16 @@ import {
 type ProfilePageProps = {
   username: string
   onHome: () => void
+  onPhotoUrlChange: (photoUrl: string) => void
 }
 
 type ProfileMode = 'edit' | 'create'
 
-export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
+export function ProfilePage({
+  username,
+  onHome,
+  onPhotoUrlChange,
+}: Readonly<ProfilePageProps>) {
   const { t } = useTranslation()
   const profileSchema = useMemo(() => createProfileSchema(t), [t])
   const [personId, setPersonId] = useState<string | null>(null)
@@ -58,6 +64,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
     handleSubmit,
     reset,
     setError,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -89,6 +96,7 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
         setPersonId(person.id)
         setMode('edit')
         savePersonIdForUser(username, person.id)
+        savePhotoUrlForUser(username, person.photoUrl)
         reset({
           firstName: person.firstName,
           lastName: person.lastName,
@@ -155,6 +163,8 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
         setPersonId(person.id)
         setMode('edit')
         savePersonIdForUser(username, person.id)
+        savePhotoUrlForUser(username, person.photoUrl)
+        onPhotoUrlChange(person.photoUrl)
         onHome()
         return
       }
@@ -165,6 +175,8 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
       })
       setPersonId(person.id)
       savePersonIdForUser(username, person.id)
+      savePhotoUrlForUser(username, person.photoUrl)
+      onPhotoUrlChange(person.photoUrl)
       onHome()
     } catch (error_) {
       let fallbackMessage = t('profile.unableToSave')
@@ -181,6 +193,11 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
   const isBusy = isLoading || isSubmitting
   const isFormLocked = isBusy || Boolean(loadError)
   const isCreateMode = mode === 'create'
+  const photoUrlValue = watch('photoUrl')
+  const firstNameValue = watch('firstName')
+  const lastNameValue = watch('lastName')
+  const avatarName =
+    [firstNameValue, lastNameValue].filter(Boolean).join(' ').trim() || username
 
   function getSubmitLabel() {
     if (isCreateMode) {
@@ -205,7 +222,11 @@ export function ProfilePage({ username, onHome }: Readonly<ProfilePageProps>) {
       </div>
       <div className="mx-auto grid min-h-svh w-full max-w-6xl grid-cols-1 items-center gap-10 px-6 py-12 lg:grid-cols-2 lg:gap-16 lg:px-16">
         <section className="flex flex-col items-start gap-8">
-          <img src={logo} alt={t('app.logoAlt')} className="size-24 rounded-md" />
+          <UserAvatar
+            photoUrl={photoUrlValue}
+            name={avatarName}
+            className="size-24 text-2xl"
+          />
 
           <div className="flex max-w-sm flex-col gap-3">
             <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight text-foreground">

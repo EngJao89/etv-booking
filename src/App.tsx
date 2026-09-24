@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { setAuthToken } from '@/lib/axios'
+import { getPhotoUrlForUser, savePhotoUrlForUser } from '@/lib/photo-url'
 import {
   SESSION_EXPIRED_EVENT,
   clearSession,
@@ -14,6 +15,10 @@ import { LoginPage } from '@/pages/login'
 import { NewUserPage } from '@/pages/new-user'
 import { ProfilePage } from '@/pages/profile'
 import { deleteBook, listBooks } from '@/services/books'
+import {
+  PersonNotFoundError,
+  resolveProfilePerson,
+} from '@/services/persons'
 import type { AuthSession } from '@/types/auth'
 import type { Book } from '@/types/book'
 
@@ -30,6 +35,10 @@ function App() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [detailsId, setDetailsId] = useState<string | null>(null)
+  const [photoUrl, setPhotoUrl] = useState<string | null>(() => {
+    const current = loadSession()
+    return current ? getPhotoUrlForUser(current.username) : null
+  })
 
   useEffect(() => {
     function onSessionExpired() {
@@ -42,6 +51,7 @@ function App() {
       setDeletingId(null)
       setEditingId(null)
       setDetailsId(null)
+      setPhotoUrl(null)
     }
 
     window.addEventListener(SESSION_EXPIRED_EVENT, onSessionExpired)
@@ -51,6 +61,44 @@ function App() {
   useEffect(() => {
     setAuthToken(session?.accessToken ?? null)
 
+    if (!session) {
+      setPhotoUrl(null)
+      return
+    }
+
+    const username = session.username
+    setPhotoUrl(getPhotoUrlForUser(username))
+
+    let cancelled = false
+
+    async function loadPhoto() {
+      try {
+        const person = await resolveProfilePerson(username)
+        if (cancelled) {
+          return
+        }
+
+        savePhotoUrlForUser(username, person.photoUrl)
+        setPhotoUrl(person.photoUrl || null)
+      } catch (error_) {
+        if (cancelled) {
+          return
+        }
+
+        if (error_ instanceof PersonNotFoundError) {
+          setPhotoUrl(null)
+        }
+      }
+    }
+
+    void loadPhoto()
+
+    return () => {
+      cancelled = true
+    }
+  }, [session])
+
+  useEffect(() => {
     if (!session?.accessToken || screen !== 'books') {
       return
     }
@@ -91,6 +139,7 @@ function App() {
     setAuthToken(nextSession.accessToken)
     setSession(nextSession)
     setAuthScreen('login')
+    setPhotoUrl(getPhotoUrlForUser(nextSession.username))
   }
 
   function handleLogout() {
@@ -104,6 +153,7 @@ function App() {
     setDeletingId(null)
     setEditingId(null)
     setDetailsId(null)
+    setPhotoUrl(null)
   }
 
   function handleNewUser() {
@@ -123,6 +173,18 @@ function App() {
     setDetailsId(null)
     setScreen('books')
   }
+
+  const handlePhotoUrlChange = useCallback(
+    (nextPhotoUrl: string) => {
+      if (!session) {
+        return
+      }
+
+      savePhotoUrlForUser(session.username, nextPhotoUrl)
+      setPhotoUrl(nextPhotoUrl.trim() || null)
+    },
+    [session],
+  )
 
   function handleAddNewBook() {
     setScreen('add-book')
@@ -203,12 +265,19 @@ function App() {
   }
 
   if (screen === 'profile') {
-    return <ProfilePage username={session.username} onHome={handleHome} />
+    return (
+      <ProfilePage
+        username={session.username}
+        onHome={handleHome}
+        onPhotoUrlChange={handlePhotoUrlChange}
+      />
+    )
   }
 
   return (
     <BooksPage
       username={session.username}
+      photoUrl={photoUrl}
       books={books}
       isLoading={isLoadingBooks}
       error={booksError}
