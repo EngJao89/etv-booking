@@ -24,7 +24,11 @@ type AddBookPageProps = {
 }
 
 export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
-  const { t, i18n } = useTranslation()
+  const { i18n } = useTranslation()
+  const t = useMemo(() => {
+    const translate = i18n.t as unknown as (key: string) => string
+    return translate
+  }, [i18n])
   const addBookSchema = useMemo(() => createAddBookSchema(t), [t])
   const {
     register,
@@ -51,9 +55,9 @@ export function AddBookPage({ onHome, onAdd }: Readonly<AddBookPageProps>) {
       })
       onAdd(book)
     } catch (error_) {
+      const fallbackMessage = t('addBook.unableToAdd')
       setError('root', {
-        message:
-          error_ instanceof Error ? error_.message : t('addBook.unableToAdd'),
+        message: error_ instanceof Error ? error_.message : fallbackMessage,
       })
     }
   }
