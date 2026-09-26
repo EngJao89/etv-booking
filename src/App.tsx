@@ -39,6 +39,15 @@ function App() {
     const current = loadSession()
     return current ? getPhotoUrlForUser(current.username) : null
   })
+  const [photoUser, setPhotoUser] = useState<string | null>(
+    () => loadSession()?.username ?? null,
+  )
+
+  const sessionUser = session?.username ?? null
+  if (sessionUser !== photoUser) {
+    setPhotoUser(sessionUser)
+    setPhotoUrl(sessionUser ? getPhotoUrlForUser(sessionUser) : null)
+  }
 
   useEffect(() => {
     function onSessionExpired() {
@@ -60,15 +69,14 @@ function App() {
 
   useEffect(() => {
     setAuthToken(session?.accessToken ?? null)
+  }, [session])
 
+  useEffect(() => {
     if (!session) {
-      setPhotoUrl(null)
       return
     }
 
     const username = session.username
-    setPhotoUrl(getPhotoUrlForUser(username))
-
     let cancelled = false
 
     async function loadPhoto() {

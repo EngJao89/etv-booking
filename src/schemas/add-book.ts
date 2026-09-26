@@ -1,12 +1,13 @@
 import { z } from 'zod'
-import type { TFunction } from 'i18next'
 
 export function parsePrice(value: string) {
   const normalized = value.replaceAll(/\s/g, '').replace('R$', '').replace(',', '.')
   return Number(normalized)
 }
 
-export function createAddBookSchema(t: TFunction) {
+type Translate = (key: string) => string
+
+export function createAddBookSchema(t: Translate) {
   return z.object({
     title: z.string().trim().min(1, t('addBook.titleRequired')),
     author: z.string().trim().min(1, t('addBook.authorRequired')),
