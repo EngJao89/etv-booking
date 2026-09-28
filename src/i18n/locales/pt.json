@@ -100,7 +100,21 @@
     "deleteConfirmCancel": "Cancelar",
     "deleteConfirmAction": "Excluir",
     "unableToDelete": "Não foi possível excluir o livro. Tente novamente.",
-    "viewDetails": "Ver detalhes de {{title}}"
+    "viewDetails": "Ver detalhes de {{title}}",
+    "savedBooks": "Livros Salvos",
+    "savedBooksDescription": "Livros que você salvou na sua lista pessoal.",
+    "openSavedBooks": "Livros salvos",
+    "closeSavedBooks": "Fechar",
+    "saveBook": "Salvar {{title}}",
+    "savingBook": "Salvando {{title}}",
+    "bookAlreadySaved": "{{title}} já está salvo",
+    "removeFromSaved": "Remover {{title}} dos salvos",
+    "savedLoading": "Carregando livros salvos...",
+    "savedEmpty": "Nenhum livro salvo ainda.",
+    "unableToLoadSaved": "Não foi possível carregar os livros salvos. Tente novamente.",
+    "unableToSaveBook": "Não foi possível salvar o livro. Tente novamente.",
+    "unableToRemoveSaved": "Não foi possível remover o livro dos salvos. Tente novamente.",
+    "savedNotFound": "Este livro não foi encontrado na sua lista de salvos."
   },
   "bookDetails": {
     "title": "Detalhes do Livro",
