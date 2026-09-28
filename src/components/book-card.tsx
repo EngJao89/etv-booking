@@ -1,5 +1,10 @@
 import { useState } from 'react'
-import { SquarePenIcon, Trash2Icon } from 'lucide-react'
+import {
+  BookmarkCheckIcon,
+  BookmarkIcon,
+  SquarePenIcon,
+  Trash2Icon,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import {
   AlertDialog,
@@ -33,17 +38,23 @@ function BookField({ label, value }: Readonly<{ label: string; value: string }>)
 type BookCardProps = {
   book: Book
   isDeleting: boolean
+  isSaved: boolean
+  isSaving: boolean
   onOpen: (id: string) => void
   onEdit: (id: string) => void
   onDelete: (id: string) => void
+  onSave: (id: string) => void
 }
 
 export function BookCard({
   book,
   isDeleting,
+  isSaved,
+  isSaving,
   onOpen,
   onEdit,
   onDelete,
+  onSave,
 }: Readonly<BookCardProps>) {
   const { t, i18n } = useTranslation()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -58,6 +69,18 @@ export function BookCard({
     month: '2-digit',
     year: 'numeric',
   })
+
+  function getSaveLabel() {
+    if (isSaving) {
+      return t('books.savingBook', { title: book.title })
+    }
+
+    if (isSaved) {
+      return t('books.bookAlreadySaved', { title: book.title })
+    }
+
+    return t('books.saveBook', { title: book.title })
+  }
 
   return (
     <Card
@@ -145,6 +168,23 @@ export function BookCard({
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            aria-label={getSaveLabel()}
+            disabled={isSaving || isSaved}
+            onClick={(event) => {
+              event.stopPropagation()
+              onSave(book.id)
+            }}
+          >
+            {isSaved ? (
+              <BookmarkCheckIcon className="size-4 text-primary" />
+            ) : (
+              <BookmarkIcon className="size-4 text-primary" />
+            )}
+          </Button>
         </CardAction>
       </CardHeader>
       <CardContent className="gap-4">

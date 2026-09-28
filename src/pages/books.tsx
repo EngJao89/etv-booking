@@ -1,7 +1,8 @@
-import { PowerIcon } from 'lucide-react'
+import { BookmarkIcon, PowerIcon } from 'lucide-react'
 import { Trans, useTranslation } from 'react-i18next'
 import logo from '@/assets/logo.svg'
 import { BookCard } from '@/components/book-card'
+import { SavedBooksDrawer } from '@/components/saved-books-drawer'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { UserAvatar } from '@/components/user-avatar'
 import { Button } from '@/components/ui/button'
@@ -12,14 +13,23 @@ type BooksPageProps = {
   username: string
   photoUrl: string | null
   books: Book[]
+  savedBooks: Book[]
   isLoading: boolean
+  isLoadingSaved: boolean
   error: string | null
+  savedError: string | null
   deletingId: string | null
+  savingId: string | null
+  removingSavedId: string | null
+  isSavedBooksOpen: boolean
+  onSavedBooksOpenChange: (open: boolean) => void
   onAddNewBook: () => void
   onProfile: () => void
   onOpen: (id: string) => void
   onEdit: (id: string) => void
   onDelete: (id: string) => void
+  onSave: (id: string) => void
+  onRemoveSaved: (id: string) => void
   onLogout: () => void
 }
 
@@ -27,17 +37,27 @@ export function BooksPage({
   username,
   photoUrl,
   books,
+  savedBooks,
   isLoading,
+  isLoadingSaved,
   error,
+  savedError,
   deletingId,
+  savingId,
+  removingSavedId,
+  isSavedBooksOpen,
+  onSavedBooksOpenChange,
   onAddNewBook,
   onProfile,
   onOpen,
   onEdit,
   onDelete,
+  onSave,
+  onRemoveSaved,
   onLogout,
 }: Readonly<BooksPageProps>) {
   const { t } = useTranslation()
+  const savedIds = new Set(savedBooks.map((book) => book.id))
 
   return (
     <main className="min-h-svh bg-background">
@@ -76,6 +96,15 @@ export function BooksPage({
             <Button type="button" className="h-10 min-w-40 px-6" onClick={onAddNewBook}>
               {t('books.addNewBook')}
             </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 gap-2 bg-card px-4"
+              onClick={() => onSavedBooksOpenChange(true)}
+            >
+              <BookmarkIcon className="size-4" />
+              {t('books.openSavedBooks')}
+            </Button>
             <ThemeToggle />
             <Button
               type="button"
@@ -105,6 +134,16 @@ export function BooksPage({
             </Card>
           ) : null}
 
+          {savedError ? (
+            <Card className="shadow-sm">
+              <CardContent>
+                <p role="alert" className="text-sm text-destructive">
+                  {savedError}
+                </p>
+              </CardContent>
+            </Card>
+          ) : null}
+
           {isLoading && books.length === 0 ? (
             <Card className="shadow-sm">
               <CardContent>
@@ -128,15 +167,29 @@ export function BooksPage({
                   key={book.id}
                   book={book}
                   isDeleting={deletingId === book.id}
+                  isSaved={savedIds.has(book.id)}
+                  isSaving={savingId === book.id}
                   onOpen={onOpen}
                   onEdit={onEdit}
                   onDelete={onDelete}
+                  onSave={onSave}
                 />
               ))}
             </div>
           ) : null}
         </section>
       </div>
+
+      <SavedBooksDrawer
+        open={isSavedBooksOpen}
+        onOpenChange={onSavedBooksOpenChange}
+        books={savedBooks}
+        isLoading={isLoadingSaved}
+        error={savedError}
+        removingId={removingSavedId}
+        onOpenBook={onOpen}
+        onRemove={onRemoveSaved}
+      />
     </main>
   )
 }

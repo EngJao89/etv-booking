@@ -16,6 +16,11 @@ import { NewUserPage } from '@/pages/new-user'
 import { ProfilePage } from '@/pages/profile'
 import { deleteBook, listBooks } from '@/services/books'
 import {
+  listSavedBooks,
+  removeBookFromMyList,
+  saveBookToMyList,
+} from '@/services/saved-books'
+import {
   PersonNotFoundError,
   resolveProfilePerson,
 } from '@/services/persons'
@@ -35,6 +40,12 @@ function App() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [detailsId, setDetailsId] = useState<string | null>(null)
+  const [savedBooks, setSavedBooks] = useState<Book[]>([])
+  const [isLoadingSavedBooks, setIsLoadingSavedBooks] = useState(false)
+  const [savedBooksError, setSavedBooksError] = useState<string | null>(null)
+  const [savingId, setSavingId] = useState<string | null>(null)
+  const [removingSavedId, setRemovingSavedId] = useState<string | null>(null)
+  const [isSavedBooksOpen, setIsSavedBooksOpen] = useState(false)
   const [photoUrl, setPhotoUrl] = useState<string | null>(() => {
     const current = loadSession()
     return current ? getPhotoUrlForUser(current.username) : null
@@ -60,6 +71,11 @@ function App() {
       setDeletingId(null)
       setEditingId(null)
       setDetailsId(null)
+      setSavedBooks([])
+      setSavedBooksError(null)
+      setSavingId(null)
+      setRemovingSavedId(null)
+      setIsSavedBooksOpen(false)
       setPhotoUrl(null)
     }
 
@@ -135,7 +151,30 @@ function App() {
       }
     }
 
+    async function loadSavedBooks() {
+      setIsLoadingSavedBooks(true)
+      setSavedBooksError(null)
+
+      try {
+        const nextSavedBooks = await listSavedBooks()
+        if (!cancelled) {
+          setSavedBooks(nextSavedBooks)
+        }
+      } catch (error_) {
+        if (!cancelled) {
+          setSavedBooksError(
+            error_ instanceof Error ? error_.message : String(error_),
+          )
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingSavedBooks(false)
+        }
+      }
+    }
+
     void loadBooks()
+    void loadSavedBooks()
 
     return () => {
       cancelled = true
@@ -161,6 +200,11 @@ function App() {
     setDeletingId(null)
     setEditingId(null)
     setDetailsId(null)
+    setSavedBooks([])
+    setSavedBooksError(null)
+    setSavingId(null)
+    setRemovingSavedId(null)
+    setIsSavedBooksOpen(false)
     setPhotoUrl(null)
   }
 
@@ -220,12 +264,74 @@ function App() {
     try {
       await deleteBook(id)
       setBooks((current) => current.filter((book) => book.id !== id))
+      setSavedBooks((current) => current.filter((book) => book.id !== id))
     } catch (error_) {
       setBooksError(
         error_ instanceof Error ? error_.message : String(error_),
       )
     } finally {
       setDeletingId(null)
+    }
+  }
+
+  async function handleSaveBookToList(id: string) {
+    if (savedBooks.some((book) => book.id === id)) {
+      return
+    }
+
+    setSavingId(id)
+    setSavedBooksError(null)
+
+    try {
+      const savedBook = await saveBookToMyList(id)
+      setSavedBooks((current) => [
+        savedBook,
+        ...current.filter((book) => book.id !== savedBook.id),
+      ])
+    } catch (error_) {
+      setSavedBooksError(
+        error_ instanceof Error ? error_.message : String(error_),
+      )
+    } finally {
+      setSavingId(null)
+    }
+  }
+
+  async function handleRemoveSavedBook(id: string) {
+    setRemovingSavedId(id)
+    setSavedBooksError(null)
+
+    try {
+      await removeBookFromMyList(id)
+      setSavedBooks((current) => current.filter((book) => book.id !== id))
+    } catch (error_) {
+      setSavedBooksError(
+        error_ instanceof Error ? error_.message : String(error_),
+      )
+    } finally {
+      setRemovingSavedId(null)
+    }
+  }
+
+  async function handleSavedBooksOpenChange(open: boolean) {
+    setIsSavedBooksOpen(open)
+
+    if (!open) {
+      return
+    }
+
+    setIsLoadingSavedBooks(true)
+    setSavedBooksError(null)
+
+    try {
+      const nextSavedBooks = await listSavedBooks()
+      setSavedBooks(nextSavedBooks)
+    } catch (error_) {
+      setSavedBooksError(
+        error_ instanceof Error ? error_.message : String(error_),
+      )
+    } finally {
+      setIsLoadingSavedBooks(false)
     }
   }
 
@@ -287,14 +393,23 @@ function App() {
       username={session.username}
       photoUrl={photoUrl}
       books={books}
+      savedBooks={savedBooks}
       isLoading={isLoadingBooks}
+      isLoadingSaved={isLoadingSavedBooks}
       error={booksError}
+      savedError={savedBooksError}
       deletingId={deletingId}
+      savingId={savingId}
+      removingSavedId={removingSavedId}
+      isSavedBooksOpen={isSavedBooksOpen}
+      onSavedBooksOpenChange={handleSavedBooksOpenChange}
       onAddNewBook={handleAddNewBook}
       onProfile={handleProfile}
       onOpen={handleOpen}
       onEdit={handleEdit}
       onDelete={handleDelete}
+      onSave={handleSaveBookToList}
+      onRemoveSaved={handleRemoveSavedBook}
       onLogout={handleLogout}
     />
   )

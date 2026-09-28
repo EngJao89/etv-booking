@@ -100,7 +100,21 @@
     "deleteConfirmCancel": "Cancel",
     "deleteConfirmAction": "Delete",
     "unableToDelete": "Unable to delete the book. Please try again.",
-    "viewDetails": "View details of {{title}}"
+    "viewDetails": "View details of {{title}}",
+    "savedBooks": "Saved Books",
+    "savedBooksDescription": "Books you saved to your personal list.",
+    "openSavedBooks": "Saved books",
+    "closeSavedBooks": "Close",
+    "saveBook": "Save {{title}}",
+    "savingBook": "Saving {{title}}",
+    "bookAlreadySaved": "{{title}} is already saved",
+    "removeFromSaved": "Remove {{title}} from saved",
+    "savedLoading": "Loading saved books...",
+    "savedEmpty": "No saved books yet.",
+    "unableToLoadSaved": "Unable to load saved books. Please try again.",
+    "unableToSaveBook": "Unable to save the book. Please try again.",
+    "unableToRemoveSaved": "Unable to remove the book from saved. Please try again.",
+    "savedNotFound": "This book was not found in your saved list."
   },
   "bookDetails": {
     "title": "Book Details",
