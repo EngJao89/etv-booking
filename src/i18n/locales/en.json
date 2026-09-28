@@ -95,6 +95,10 @@
     "edit": "Edit {{title}}",
     "delete": "Delete {{title}}",
     "deleting": "Deleting {{title}}",
+    "deleteConfirmTitle": "Delete this book?",
+    "deleteConfirmDescription": "This will permanently remove \"{{title}}\". This action cannot be undone.",
+    "deleteConfirmCancel": "Cancel",
+    "deleteConfirmAction": "Delete",
     "unableToDelete": "Unable to delete the book. Please try again.",
     "viewDetails": "View details of {{title}}"
   },

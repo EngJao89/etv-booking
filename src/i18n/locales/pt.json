@@ -95,6 +95,10 @@
     "edit": "Editar {{title}}",
     "delete": "Excluir {{title}}",
     "deleting": "Excluindo {{title}}",
+    "deleteConfirmTitle": "Excluir este livro?",
+    "deleteConfirmDescription": "Isso removerá permanentemente \"{{title}}\". Esta ação não pode ser desfeita.",
+    "deleteConfirmCancel": "Cancelar",
+    "deleteConfirmAction": "Excluir",
     "unableToDelete": "Não foi possível excluir o livro. Tente novamente.",
     "viewDetails": "Ver detalhes de {{title}}"
   },

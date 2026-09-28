@@ -1,5 +1,17 @@
+import { useState } from 'react'
 import { SquarePenIcon, Trash2Icon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import {
   Card,
   CardAction,
@@ -34,6 +46,7 @@ export function BookCard({
   onDelete,
 }: Readonly<BookCardProps>) {
   const { t, i18n } = useTranslation()
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const priceFormatter = new Intl.NumberFormat(i18n.language, {
     style: 'currency',
     currency: 'BRL',
@@ -75,23 +88,63 @@ export function BookCard({
           >
             <SquarePenIcon className="size-4 text-primary" />
           </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-xs"
-            aria-label={
-              isDeleting
-                ? t('books.deleting', { title: book.title })
-                : t('books.delete', { title: book.title })
-            }
-            disabled={isDeleting}
-            onClick={(event) => {
-              event.stopPropagation()
-              onDelete(book.id)
-            }}
+          <AlertDialog
+            open={isDeleteDialogOpen}
+            onOpenChange={setIsDeleteDialogOpen}
           >
-            <Trash2Icon className="size-4 text-primary" />
-          </Button>
+            <AlertDialogTrigger
+              disabled={isDeleting}
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label={
+                    isDeleting
+                      ? t('books.deleting', { title: book.title })
+                      : t('books.delete', { title: book.title })
+                  }
+                  disabled={isDeleting}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                  }}
+                />
+              }
+            >
+              <Trash2Icon className="size-4 text-primary" />
+            </AlertDialogTrigger>
+            <AlertDialogContent
+              size="sm"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {t('books.deleteConfirmTitle')}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t('books.deleteConfirmDescription', { title: book.title })}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isDeleting}>
+                  {t('books.deleteConfirmCancel')}
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  disabled={isDeleting}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    onDelete(book.id)
+                    setIsDeleteDialogOpen(false)
+                  }}
+                >
+                  {isDeleting
+                    ? t('books.deleting', { title: book.title })
+                    : t('books.deleteConfirmAction')}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </CardAction>
       </CardHeader>
       <CardContent className="gap-4">
