@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeftIcon, ChevronDownIcon } from 'lucide-react'
+import { ArrowLeftIcon, BookmarkIcon, ChevronDownIcon } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { LanguageToggle } from '@/components/language-toggle'
+import { SavedBooksDrawer } from '@/components/saved-books-drawer'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { UserAvatar } from '@/components/user-avatar'
 import { Button } from '@/components/ui/button'
@@ -38,19 +39,36 @@ import {
   resolveProfilePerson,
   updatePerson,
 } from '@/services/persons'
+import type { Book } from '@/types/book'
 
 type ProfilePageProps = {
   username: string
+  savedBooks: Book[]
+  isLoadingSaved: boolean
+  savedError: string | null
+  removingSavedId: string | null
+  isSavedBooksOpen: boolean
   onHome: () => void
   onPhotoUrlChange: (photoUrl: string) => void
+  onSavedBooksOpenChange: (open: boolean) => void
+  onOpenBook: (id: string) => void
+  onRemoveSaved: (id: string) => void
 }
 
 type ProfileMode = 'edit' | 'create'
 
 export function ProfilePage({
   username,
+  savedBooks,
+  isLoadingSaved,
+  savedError,
+  removingSavedId,
+  isSavedBooksOpen,
   onHome,
   onPhotoUrlChange,
+  onSavedBooksOpenChange,
+  onOpenBook,
+  onRemoveSaved,
 }: Readonly<ProfilePageProps>) {
   const { t } = useTranslation()
   const profileSchema = useMemo(() => createProfileSchema(t), [t])
@@ -218,6 +236,16 @@ export function ProfilePage({
     <main className="relative min-h-svh bg-background">
       <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
         <LanguageToggle />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="size-10 bg-card"
+          aria-label={t('books.openSavedBooks')}
+          onClick={() => onSavedBooksOpenChange(true)}
+        >
+          <BookmarkIcon />
+        </Button>
         <ThemeToggle />
       </div>
       <div className="mx-auto grid min-h-svh w-full max-w-6xl grid-cols-1 items-center gap-10 px-6 py-12 lg:grid-cols-2 lg:gap-16 lg:px-16">
@@ -445,6 +473,17 @@ export function ProfilePage({
           </form>
         </section>
       </div>
+
+      <SavedBooksDrawer
+        open={isSavedBooksOpen}
+        onOpenChange={onSavedBooksOpenChange}
+        books={savedBooks}
+        isLoading={isLoadingSaved}
+        error={savedError}
+        removingId={removingSavedId}
+        onOpenBook={onOpenBook}
+        onRemove={onRemoveSaved}
+      />
     </main>
   )
 }

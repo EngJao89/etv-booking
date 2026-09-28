@@ -382,8 +382,16 @@ function App() {
     return (
       <ProfilePage
         username={session.username}
+        savedBooks={savedBooks}
+        isLoadingSaved={isLoadingSavedBooks}
+        savedError={savedBooksError}
+        removingSavedId={removingSavedId}
+        isSavedBooksOpen={isSavedBooksOpen}
         onHome={handleHome}
         onPhotoUrlChange={handlePhotoUrlChange}
+        onSavedBooksOpenChange={handleSavedBooksOpenChange}
+        onOpenBook={handleOpen}
+        onRemoveSaved={handleRemoveSavedBook}
       />
     )
   }
