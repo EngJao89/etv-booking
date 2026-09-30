@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeftIcon } from 'lucide-react'
+import { ArrowLeftIcon, BookmarkCheckIcon, BookmarkIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import logo from '@/assets/logo.svg'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -10,8 +10,11 @@ import type { Book } from '@/types/book'
 
 type BookDetailsPageProps = {
   bookId: string
+  isSaved: boolean
+  isSaving: boolean
   onHome: () => void
   onEdit: (id: string) => void
+  onSave: (id: string) => void
 }
 
 function DetailField({ label, value }: Readonly<{ label: string; value: string }>) {
@@ -25,8 +28,11 @@ function DetailField({ label, value }: Readonly<{ label: string; value: string }
 
 export function BookDetailsPage({
   bookId,
+  isSaved,
+  isSaving,
   onHome,
   onEdit,
+  onSave,
 }: Readonly<BookDetailsPageProps>) {
   const { t, i18n } = useTranslation()
   const [book, setBook] = useState<Book | null>(null)
@@ -78,6 +84,18 @@ export function BookDetailsPage({
     year: 'numeric',
   })
 
+  function getSaveLabel(title: string) {
+    if (isSaving) {
+      return t('books.savingBook', { title })
+    }
+
+    if (isSaved) {
+      return t('books.bookAlreadySaved', { title })
+    }
+
+    return t('books.saveBook', { title })
+  }
+
   return (
     <main className="relative min-h-svh bg-background">
       <div className="absolute top-4 right-4 z-10">
@@ -120,7 +138,24 @@ export function BookDetailsPage({
 
               {book ? (
                 <>
-                  <DetailField label={t('books.title')} value={book.title} />
+                  <div className="flex items-start justify-between gap-3">
+                    <DetailField label={t('books.title')} value={book.title} />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="size-10 shrink-0 bg-card"
+                      aria-label={getSaveLabel(book.title)}
+                      disabled={isSaving || isSaved}
+                      onClick={() => onSave(book.id)}
+                    >
+                      {isSaved ? (
+                        <BookmarkCheckIcon className="size-4 text-primary" />
+                      ) : (
+                        <BookmarkIcon className="size-4 text-primary" />
+                      )}
+                    </Button>
+                  </div>
                   <DetailField label={t('books.author')} value={book.author} />
                   <DetailField
                     label={t('books.price')}

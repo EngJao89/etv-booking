@@ -372,8 +372,11 @@ function App() {
     return (
       <BookDetailsPage
         bookId={detailsId}
+        isSaved={savedBooks.some((book) => book.id === detailsId)}
+        isSaving={savingId === detailsId}
         onHome={handleHome}
         onEdit={handleEdit}
+        onSave={handleSaveBookToList}
       />
     )
   }
