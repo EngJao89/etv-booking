@@ -16,9 +16,22 @@ function getStoredLanguage(): AppLanguage {
   return 'en'
 }
 
+/** Typed wrapper so service code can use unprefixed keys like `signIn.unableToSignIn`. */
+export function translate(
+  key: string,
+  options?: Record<string, unknown>,
+): string {
+  return String(
+    (i18n.t as (key: string, options?: Record<string, unknown>) => string)(
+      key,
+      options,
+    ),
+  )
+}
+
 function applyLanguage(language: string) {
   document.documentElement.lang = language
-  document.title = i18n.t('app.title')
+  document.title = translate('app.title')
 }
 
 void i18n.use(initReactI18next).init({
