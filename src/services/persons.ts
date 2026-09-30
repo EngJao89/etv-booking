@@ -144,7 +144,8 @@ export async function createPerson(payload: CreatePersonPayload): Promise<Person
 
     return mapPersonFromApi(data)
   } catch (error) {
-    throw new Error(getCreatePersonErrorMessage(error))
+    const message = getCreatePersonErrorMessage(error)
+    throw new Error(message, { cause: error })
   }
 }
 
@@ -162,7 +163,8 @@ export async function getPerson(id: string): Promise<Person> {
       throw error
     }
 
-    throw new Error(getPersonErrorMessage(error, 'profile.unableToLoad'))
+    const message = getPersonErrorMessage(error, 'profile.unableToLoad')
+    throw new Error(message, { cause: error })
   }
 }
 
@@ -220,7 +222,8 @@ export async function resolveProfilePerson(username: string): Promise<Person> {
       throw new PersonNotFoundError()
     }
 
-    throw new Error(getPersonErrorMessage(error, 'profile.unableToLoad'))
+    const message = getPersonErrorMessage(error, 'profile.unableToLoad')
+    throw new Error(message, { cause: error })
   }
 }
 
@@ -239,6 +242,7 @@ export async function updatePerson(payload: UpdatePersonPayload): Promise<Person
 
     return mapPersonFromApi(data)
   } catch (error) {
-    throw new Error(getPersonErrorMessage(error, 'profile.unableToSave'))
+    const message = getPersonErrorMessage(error, 'profile.unableToSave')
+    throw new Error(message, { cause: error })
   }
 }

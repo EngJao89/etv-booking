@@ -61,7 +61,8 @@ export async function listSavedBooks(): Promise<Book[]> {
 
     return data.filter(isBookApiResponse).map(mapBookFromApi)
   } catch (error) {
-    throw new Error(getSavedBooksErrorMessage(error, 'books.unableToLoadSaved'))
+    const message = getSavedBooksErrorMessage(error, 'books.unableToLoadSaved')
+    throw new Error(message, { cause: error })
   }
 }
 
@@ -73,7 +74,8 @@ export async function saveBookToMyList(bookId: string): Promise<Book> {
 
     return mapBookFromApi(data)
   } catch (error) {
-    throw new Error(getSavedBooksErrorMessage(error, 'books.unableToSaveBook'))
+    const message = getSavedBooksErrorMessage(error, 'books.unableToSaveBook')
+    throw new Error(message, { cause: error })
   }
 }
 
@@ -85,8 +87,7 @@ export async function removeBookFromMyList(bookId: string): Promise<void> {
       return
     }
 
-    throw new Error(
-      getSavedBooksErrorMessage(error, 'books.unableToRemoveSaved'),
-    )
+    const message = getSavedBooksErrorMessage(error, 'books.unableToRemoveSaved')
+    throw new Error(message, { cause: error })
   }
 }
