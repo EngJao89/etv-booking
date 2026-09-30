@@ -1,5 +1,5 @@
 import { isAxiosError } from 'axios'
-import i18n from '@/i18n'
+import { translate } from '@/i18n'
 import { getApiErrorMessage } from '@/lib/api-error'
 import { axios } from '@/lib/axios'
 import { mapBookFromApi } from '@/services/books'
@@ -31,24 +31,24 @@ function getSavedBooksErrorMessage(
     | 'books.unableToRemoveSaved',
 ) {
   if (!isAxiosError(error)) {
-    return i18n.t(fallbackKey)
+    return translate(fallbackKey)
   }
 
   if (!error.response) {
-    return i18n.t('books.couldNotReachServer')
+    return translate('books.couldNotReachServer')
   }
 
   const { status, data } = error.response
 
   if (status === 401 || status === 403) {
-    return i18n.t('books.unauthorized')
+    return translate('books.unauthorized')
   }
 
   if (status === 404) {
-    return i18n.t('books.savedNotFound')
+    return translate('books.savedNotFound')
   }
 
-  return getApiErrorMessage(data) ?? i18n.t(fallbackKey)
+  return getApiErrorMessage(data) ?? translate(fallbackKey)
 }
 
 export async function listSavedBooks(): Promise<Book[]> {
