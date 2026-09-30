@@ -1,5 +1,5 @@
 import { isAxiosError } from 'axios'
-import i18n from '@/i18n'
+import { translate } from '@/i18n'
 import { getApiErrorMessage } from '@/lib/api-error'
 import { axios } from '@/lib/axios'
 import {
@@ -13,7 +13,7 @@ export type UpdatePersonPayload = CreatePersonPayload & {
 }
 
 export class PersonNotFoundError extends Error {
-  constructor(message = i18n.t('profile.notFound')) {
+  constructor(message = translate('profile.notFound')) {
     super(message)
     this.name = 'PersonNotFoundError'
   }
@@ -32,25 +32,25 @@ type PersonApiResponse = {
 
 function getCreatePersonErrorMessage(error: unknown) {
   if (!isAxiosError(error)) {
-    return i18n.t('profile.unableToCreate')
+    return translate('profile.unableToCreate')
   }
 
   if (!error.response) {
-    return i18n.t('profile.couldNotReachServer')
+    return translate('profile.couldNotReachServer')
   }
 
   const { status, data } = error.response
 
   if (status === 401 || status === 403) {
-    return i18n.t('profile.unauthorized')
+    return translate('profile.unauthorized')
   }
 
   const apiMessage = getApiErrorMessage(data)
   if (apiMessage === 'gender_too_long') {
-    return i18n.t('newUser.genderInvalid')
+    return translate('newUser.genderInvalid')
   }
 
-  return apiMessage ?? i18n.t('profile.unableToCreate')
+  return apiMessage ?? translate('profile.unableToCreate')
 }
 
 function getPersonErrorMessage(
@@ -58,29 +58,29 @@ function getPersonErrorMessage(
   fallbackKey: 'profile.unableToLoad' | 'profile.unableToSave',
 ) {
   if (!isAxiosError(error)) {
-    return i18n.t(fallbackKey)
+    return translate(fallbackKey)
   }
 
   if (!error.response) {
-    return i18n.t('profile.couldNotReachServer')
+    return translate('profile.couldNotReachServer')
   }
 
   const { status, data } = error.response
 
   if (status === 401 || status === 403) {
-    return i18n.t('profile.unauthorized')
+    return translate('profile.unauthorized')
   }
 
   if (status === 404) {
-    return i18n.t('profile.notFound')
+    return translate('profile.notFound')
   }
 
   const apiMessage = getApiErrorMessage(data)
   if (apiMessage === 'gender_too_long') {
-    return i18n.t('newUser.genderInvalid')
+    return translate('newUser.genderInvalid')
   }
 
-  return apiMessage ?? i18n.t(fallbackKey)
+  return apiMessage ?? translate(fallbackKey)
 }
 
 function isPersonApiResponse(value: unknown): value is PersonApiResponse {
@@ -153,7 +153,7 @@ export async function getPerson(id: string): Promise<Person> {
     const { data } = await axios.get<unknown>(`/api/person/v1/${encodeURIComponent(id)}`)
 
     if (!isPersonApiResponse(data)) {
-      throw new Error(i18n.t('profile.unableToLoad'))
+      throw new Error(translate('profile.unableToLoad'))
     }
 
     return mapPersonFromApi(data)

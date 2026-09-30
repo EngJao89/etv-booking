@@ -1,5 +1,5 @@
 import { isAxiosError } from 'axios'
-import i18n from '@/i18n'
+import { translate } from '@/i18n'
 import { getApiErrorMessage } from '@/lib/api-error'
 import { axios } from '@/lib/axios'
 import type { Book } from '@/types/book'
@@ -25,20 +25,20 @@ type BookApiResponse = {
 
 function getCreateBookErrorMessage(error: unknown) {
   if (!isAxiosError(error)) {
-    return i18n.t('addBook.unableToAdd')
+    return translate('addBook.unableToAdd')
   }
 
   if (!error.response) {
-    return i18n.t('addBook.couldNotReachServer')
+    return translate('addBook.couldNotReachServer')
   }
 
   const { status, data } = error.response
 
   if (status === 401 || status === 403) {
-    return i18n.t('addBook.unauthorized')
+    return translate('addBook.unauthorized')
   }
 
-  return getApiErrorMessage(data) ?? i18n.t('addBook.unableToAdd')
+  return getApiErrorMessage(data) ?? translate('addBook.unableToAdd')
 }
 
 function toReleaseDate(launchDate: BookApiResponse['launchDate']) {
@@ -70,86 +70,86 @@ export function mapBookFromApi(data: BookApiResponse): Book {
 
 function getListBooksErrorMessage(error: unknown) {
   if (!isAxiosError(error)) {
-    return i18n.t('books.unableToLoad')
+    return translate('books.unableToLoad')
   }
 
   if (!error.response) {
-    return i18n.t('books.couldNotReachServer')
+    return translate('books.couldNotReachServer')
   }
 
   const { status, data } = error.response
 
   if (status === 401 || status === 403) {
-    return i18n.t('books.unauthorized')
+    return translate('books.unauthorized')
   }
 
-  return getApiErrorMessage(data) ?? i18n.t('books.unableToLoad')
+  return getApiErrorMessage(data) ?? translate('books.unableToLoad')
 }
 
 function getDeleteBookErrorMessage(error: unknown) {
   if (!isAxiosError(error)) {
-    return i18n.t('books.unableToDelete')
+    return translate('books.unableToDelete')
   }
 
   if (!error.response) {
-    return i18n.t('books.couldNotReachServer')
+    return translate('books.couldNotReachServer')
   }
 
   const { status, data } = error.response
 
   if (status === 401 || status === 403) {
-    return i18n.t('books.unauthorized')
+    return translate('books.unauthorized')
   }
 
   if (status === 404) {
-    return i18n.t('books.unableToDelete')
+    return translate('books.unableToDelete')
   }
 
-  return getApiErrorMessage(data) ?? i18n.t('books.unableToDelete')
+  return getApiErrorMessage(data) ?? translate('books.unableToDelete')
 }
 
 function getBookByIdErrorMessage(error: unknown) {
   if (!isAxiosError(error)) {
-    return i18n.t('editBook.unableToLoad')
+    return translate('editBook.unableToLoad')
   }
 
   if (!error.response) {
-    return i18n.t('editBook.couldNotReachServer')
+    return translate('editBook.couldNotReachServer')
   }
 
   const { status, data } = error.response
 
   if (status === 401 || status === 403) {
-    return i18n.t('editBook.unauthorized')
+    return translate('editBook.unauthorized')
   }
 
   if (status === 404) {
-    return i18n.t('editBook.notFound')
+    return translate('editBook.notFound')
   }
 
-  return getApiErrorMessage(data) ?? i18n.t('editBook.unableToLoad')
+  return getApiErrorMessage(data) ?? translate('editBook.unableToLoad')
 }
 
 function getUpdateBookErrorMessage(error: unknown) {
   if (!isAxiosError(error)) {
-    return i18n.t('editBook.unableToSave')
+    return translate('editBook.unableToSave')
   }
 
   if (!error.response) {
-    return i18n.t('editBook.couldNotReachServer')
+    return translate('editBook.couldNotReachServer')
   }
 
   const { status, data } = error.response
 
   if (status === 401 || status === 403) {
-    return i18n.t('editBook.unauthorized')
+    return translate('editBook.unauthorized')
   }
 
   if (status === 404) {
-    return i18n.t('editBook.notFound')
+    return translate('editBook.notFound')
   }
 
-  return getApiErrorMessage(data) ?? i18n.t('editBook.unableToSave')
+  return getApiErrorMessage(data) ?? translate('editBook.unableToSave')
 }
 
 function isBookApiResponse(value: unknown): value is BookApiResponse {
@@ -237,7 +237,8 @@ export async function listBooks(): Promise<Book[]> {
 
     return firstPage.books
   } catch (error) {
-    throw new Error(getListBooksErrorMessage(error))
+    const message = getListBooksErrorMessage(error)
+    throw new Error(message, { cause: error })
   }
 }
 
@@ -252,7 +253,8 @@ export async function createBook(payload: CreateBookPayload): Promise<Book> {
 
     return mapBookFromApi(data)
   } catch (error) {
-    throw new Error(getCreateBookErrorMessage(error))
+    const message = getCreateBookErrorMessage(error)
+    throw new Error(message, { cause: error })
   }
 }
 
@@ -264,7 +266,8 @@ export async function deleteBook(id: string): Promise<void> {
       return
     }
 
-    throw new Error(getDeleteBookErrorMessage(error))
+    const message = getDeleteBookErrorMessage(error)
+    throw new Error(message, { cause: error })
   }
 }
 
@@ -273,7 +276,7 @@ export async function getBook(id: string): Promise<Book> {
     const { data } = await axios.get<unknown>(`/api/book/v1/${encodeURIComponent(id)}`)
 
     if (!isBookApiResponse(data)) {
-      throw new Error(i18n.t('editBook.unableToLoad'))
+      throw new Error(translate('editBook.unableToLoad'))
     }
 
     return mapBookFromApi(data)
@@ -282,7 +285,8 @@ export async function getBook(id: string): Promise<Book> {
       throw error
     }
 
-    throw new Error(getBookByIdErrorMessage(error))
+    const message = getBookByIdErrorMessage(error)
+    throw new Error(message, { cause: error })
   }
 }
 
@@ -298,6 +302,7 @@ export async function updateBook(payload: UpdateBookPayload): Promise<Book> {
 
     return mapBookFromApi(data)
   } catch (error) {
-    throw new Error(getUpdateBookErrorMessage(error))
+    const message = getUpdateBookErrorMessage(error)
+    throw new Error(message, { cause: error })
   }
 }
