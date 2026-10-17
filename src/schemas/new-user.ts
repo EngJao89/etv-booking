@@ -1,7 +1,8 @@
 import { z } from 'zod'
-import type { TFunction } from 'i18next'
 
-export function createNewUserSchema(t: TFunction) {
+type Translate = (key: string) => string
+
+export function createNewUserSchema(t: Translate) {
   return z.object({
     username: z.string().trim().min(1, t('newUser.usernameRequired')),
     password: z.string().min(1, t('newUser.passwordRequired')),
