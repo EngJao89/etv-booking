@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeftIcon, BookmarkCheckIcon, BookmarkIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import logo from '@/assets/logo.svg'
@@ -34,7 +34,10 @@ export function BookDetailsPage({
   onEdit,
   onSave,
 }: Readonly<BookDetailsPageProps>) {
-  const { t, i18n } = useTranslation()
+  const { i18n } = useTranslation()
+  const t = useMemo(() => {
+    return i18n.t as unknown as (key: string, options?: Record<string, unknown>) => string
+  }, [i18n])
   const [book, setBook] = useState<Book | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
