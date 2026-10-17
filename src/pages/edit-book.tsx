@@ -18,7 +18,10 @@ type EditBookPageProps = {
 }
 
 export function EditBookPage({ bookId, onHome, onSave }: Readonly<EditBookPageProps>) {
-  const { t, i18n } = useTranslation()
+  const { i18n } = useTranslation()
+  const t = useMemo(() => {
+    return i18n.t as unknown as (key: string, options?: Record<string, unknown>) => string
+  }, [i18n])
   const bookSchema = useMemo(() => createAddBookSchema(t), [t])
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
