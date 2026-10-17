@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { BookmarkIcon, PowerIcon } from 'lucide-react'
 import { Trans, useTranslation } from 'react-i18next'
 import logo from '@/assets/logo.svg'
@@ -56,7 +57,10 @@ export function BooksPage({
   onRemoveSaved,
   onLogout,
 }: Readonly<BooksPageProps>) {
-  const { t } = useTranslation()
+  const { i18n } = useTranslation()
+  const t = useMemo(() => {
+    return i18n.t as unknown as (key: string, options?: Record<string, unknown>) => string
+  }, [i18n])
   const savedIds = new Set(savedBooks.map((book) => book.id))
 
   return (
@@ -76,7 +80,7 @@ export function BooksPage({
               </button>
               <p className="text-sm text-foreground sm:text-base">
                 <Trans
-                  i18nKey="books.welcome"
+                  i18nKey={'books.welcome' as never}
                   values={{ username }}
                   components={{
                     name: (
