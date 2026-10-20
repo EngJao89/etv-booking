@@ -70,7 +70,10 @@ export function ProfilePage({
   onOpenBook,
   onRemoveSaved,
 }: Readonly<ProfilePageProps>) {
-  const { t } = useTranslation()
+  const { i18n } = useTranslation()
+  const t = useMemo(() => {
+    return i18n.t as unknown as (key: string, options?: Record<string, unknown>) => string
+  }, [i18n])
   const profileSchema = useMemo(() => createProfileSchema(t), [t])
   const [personId, setPersonId] = useState<string | null>(null)
   const [mode, setMode] = useState<ProfileMode>('edit')
