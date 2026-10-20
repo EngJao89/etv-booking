@@ -23,7 +23,10 @@ type NewUserPageProps = {
 }
 
 export function NewUserPage({ onBackToLogin, onCreated }: Readonly<NewUserPageProps>) {
-  const { t } = useTranslation()
+  const { i18n } = useTranslation()
+  const t = useMemo(() => {
+    return i18n.t as unknown as (key: string, options?: Record<string, unknown>) => string
+  }, [i18n])
   const newUserSchema = useMemo(() => createNewUserSchema(t), [t])
   const {
     register,
