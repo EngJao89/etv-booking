@@ -24,7 +24,10 @@ type LoginPageProps = {
 }
 
 export function LoginPage({ onLogin, onNewUser }: Readonly<LoginPageProps>) {
-  const { t } = useTranslation()
+  const { i18n } = useTranslation()
+  const t = useMemo(() => {
+    return i18n.t as unknown as (key: string, options?: Record<string, unknown>) => string
+  }, [i18n])
   const signInSchema = useMemo(() => createSignInSchema(t), [t])
   const {
     register,
