@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   BookmarkCheckIcon,
   BookmarkIcon,
@@ -56,7 +56,10 @@ export function BookCard({
   onDelete,
   onSave,
 }: Readonly<BookCardProps>) {
-  const { t, i18n } = useTranslation()
+  const { i18n } = useTranslation()
+  const t = useMemo(() => {
+    return i18n.t as unknown as (key: string, options?: Record<string, unknown>) => string
+  }, [i18n])
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const priceFormatter = new Intl.NumberFormat(i18n.language, {
     style: 'currency',
