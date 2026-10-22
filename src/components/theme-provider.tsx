@@ -1,16 +1,7 @@
-import { createContext, use, useLayoutEffect, useMemo, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useMemo, useState, type ReactNode } from 'react'
+import { ThemeContext, type Theme } from '@/components/theme-context'
 
 const STORAGE_KEY = 'etv-theme'
-
-export type Theme = 'light' | 'dark' | 'system'
-
-type ThemeContextValue = {
-  theme: Theme
-  resolvedTheme: 'light' | 'dark'
-  setTheme: (theme: Theme) => void
-}
-
-const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 function getSystemTheme(): 'light' | 'dark' {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
@@ -24,35 +15,26 @@ function getStoredTheme(): Theme {
   return 'system'
 }
 
-function applyTheme(theme: Theme) {
-  const resolved = theme === 'system' ? getSystemTheme() : theme
-  document.documentElement.classList.toggle('dark', resolved === 'dark')
-  return resolved
-}
-
 export function ThemeProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [theme, setTheme] = useState<Theme>(getStoredTheme)
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() =>
-    theme === 'system' ? getSystemTheme() : theme,
-  )
+  const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>(getSystemTheme)
+  const resolvedTheme = theme === 'system' ? systemTheme : theme
 
   useLayoutEffect(() => {
-    setResolvedTheme(applyTheme(theme))
+    document.documentElement.classList.toggle('dark', resolvedTheme === 'dark')
     localStorage.setItem(STORAGE_KEY, theme)
-  }, [theme])
+  }, [theme, resolvedTheme])
 
   useLayoutEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)')
 
     function handleChange() {
-      if (theme === 'system') {
-        setResolvedTheme(applyTheme('system'))
-      }
+      setSystemTheme(media.matches ? 'dark' : 'light')
     }
 
     media.addEventListener('change', handleChange)
     return () => media.removeEventListener('change', handleChange)
-  }, [theme])
+  }, [])
 
   const value = useMemo(
     () => ({ theme, resolvedTheme, setTheme }),
@@ -60,12 +42,4 @@ export function ThemeProvider({ children }: Readonly<{ children: ReactNode }>) {
   )
 
   return <ThemeContext value={value}>{children}</ThemeContext>
-}
-
-export function useTheme() {
-  const context = use(ThemeContext)
-  if (!context) {
-    throw new Error('useTheme must be used within ThemeProvider')
-  }
-  return context
 }
