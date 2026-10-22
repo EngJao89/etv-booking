@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { BookmarkXIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -33,7 +34,10 @@ export function SavedBooksDrawer({
   onOpenBook,
   onRemove,
 }: Readonly<SavedBooksDrawerProps>) {
-  const { t, i18n } = useTranslation()
+  const { i18n } = useTranslation()
+  const t = useMemo(() => {
+    return i18n.t as unknown as (key: string, options?: Record<string, unknown>) => string
+  }, [i18n])
   const priceFormatter = new Intl.NumberFormat(i18n.language, {
     style: 'currency',
     currency: 'BRL',
