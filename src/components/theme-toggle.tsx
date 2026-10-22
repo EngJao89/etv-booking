@@ -1,6 +1,6 @@
 import { MonitorIcon, MoonIcon, SunIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useTheme, type Theme } from '@/components/theme-provider'
+import { useTheme, type Theme } from '@/components/theme-context'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
