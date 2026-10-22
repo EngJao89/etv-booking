@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { MonitorIcon, MoonIcon, SunIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTheme, type Theme } from '@/components/theme-context'
@@ -10,7 +11,10 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 export function ThemeToggle() {
-  const { t } = useTranslation()
+  const { i18n } = useTranslation()
+  const t = useMemo(() => {
+    return i18n.t as unknown as (key: string, options?: Record<string, unknown>) => string
+  }, [i18n])
   const { theme, resolvedTheme, setTheme } = useTheme()
   const options: { value: Theme; label: string; icon: typeof SunIcon }[] = [
     { value: 'light', label: t('theme.light'), icon: SunIcon },
